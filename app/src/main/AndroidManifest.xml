@@ -10,15 +10,15 @@
 
 
         <activity
-            android:name=".LoginScreen"
+            android:name="com.aransmith.app.receiptlogger.activities.LoginScreen"
             android:label="ReceiptLogger">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ActionSet"></activity>
-        <activity android:name=".LogExpense"></activity>
+        <activity android:name="com.aransmith.app.receiptlogger.activities.ActionSet"></activity>
+        <activity android:name="com.aransmith.app.receiptlogger.activities.LogExpense"></activity>
 
     </application>
 

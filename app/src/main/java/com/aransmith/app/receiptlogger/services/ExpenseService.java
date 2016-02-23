@@ -16,7 +16,6 @@ public class ExpenseService {
     }
 
     public boolean submitExpense(Expense expense){
-
         this.expense = expense;
         return true;
     }

@@ -68,4 +68,6 @@ dependencies {
     compile 'com.rmtheis:tess-two:5.4.1'
     compile 'org.projectlombok:lombok:1.16.2'
     compile 'org.glassfish:javax.annotation:10.0-b28'
+    compile 'javax.mail:mail:1.4.7'
 }
+
