@@ -9,6 +9,7 @@ model{
             applicationId = "com.aransmith.app.receiptlogger"
             minSdkVersion.apiLevel = 8
             targetSdkVersion.apiLevel = 10
+            multiDexEnabled = true
         }
     }
 
@@ -58,6 +59,10 @@ model{
         // To include all cpu architectures, leaves abiFilters empty
         create("all")
     }
+
+    android.packagingOptions{
+        exclude 'META-INF/LICENSE.txt'
+    }
 }
 
 dependencies {
@@ -69,5 +74,5 @@ dependencies {
     compile 'org.projectlombok:lombok:1.16.2'
     compile 'org.glassfish:javax.annotation:10.0-b28'
     compile 'javax.mail:mail:1.4.7'
+    compile 'org.apache.commons:commons-lang3:3.0'
 }
-

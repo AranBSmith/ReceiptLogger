@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class Expense {
 
-    String email;
-    String category;
-    String date;
+    private String email;
+    private String category;
+    private String date;
 }
