@@ -26,25 +26,44 @@ public class FieldExtractor {
      * @return HashMap containing the names of relevent fields and their values
      * e.g. AID, Total, MerchantId, cardNumber etc.
      */
+
+    StringComparison stringComparison;
+
     HashMap<String, String> performFieldExtraction(String ocrdText){
 
         HashMap<String, String> fields = new HashMap<>();
-        String AID = "AID";
-        String total = "Total";
-        LinkedList<String> AIDValues = firstPass(AID, ocrdText);
+
+        ocrdText = ocrdText.toLowerCase();
+
+        String AID = "aid";
+        // total, amount
+        String total = "sale";
+        // number, visadebit
+        String cardNumber = "number";
+
+        fields.put(AID, getField(AID, ocrdText));
+        fields.put(total, getField(total, ocrdText));
+        fields.put(cardNumber, getField(cardNumber, ocrdText));
+
+        return fields;
+    }
+
+    private String getField(String fieldName, String ocrdText){
+        String value = "";
+        LinkedList<String> fieldValues = firstPass(fieldName, ocrdText);
 
         // perform the first pass.
-        if(AIDValues.size() == 1){
-            fields.put(AID, AIDValues.getFirst());
+        if(fieldValues.size() == 1){
+            value = fieldValues.getFirst();
         }
 
-        else if(AIDValues.size() > 1){
+        else if(fieldValues.size() > 1){
 
         }
 
         // need to perform a more sophisticated search, perform a second pass.
-        else if(AIDValues.size() == 0){
-
+        else if(fieldValues.size() == 0){
+            secondPass(fieldName, ocrdText);
         }
 
         // need to perform a more sophisticated search, perform a third pass.
@@ -52,7 +71,7 @@ public class FieldExtractor {
 
         }
 
-        return fields;
+        return value;
     }
 
     /**
@@ -66,25 +85,67 @@ public class FieldExtractor {
      * @return The associated with the given field as a String.
      */
     private LinkedList<String> firstPass(String fieldName, String ocrdText){
+        String[] words = splitOcrdText(ocrdText);
+
+        boolean found = false;
+        LinkedList<String> values = new LinkedList<>();
+
+        int i = 0;
+        for(String word : words){
+            // System.out.println(word);
+            if(word.equals(fieldName)){
+                found = true;
+            }
+
+            // to include cent amount after space character.
+            else if(found && fieldName.equals("sale")){
+                word = word.concat(words[i+1]);
+                values.add(word);
+            }
+
+            else if(found){
+                values.add(word);
+                found = false;
+            }
+
+            i++;
+        }
+        return values;
+    }
+
+    private LinkedList<String> secondPass(String fieldName, String ocrdText){
+        String[] words = splitOcrdText(ocrdText);
+        stringComparison = new StringComparison();
+
+        boolean found = false;
+        LinkedList<String> values = new LinkedList<>();
+
+        for(String word : words){
+            int score = stringComparison.stringCompare(word,"AID");
+
+            if(found){
+                values.add(word);
+                found = false;
+            }
+
+            else if(score!=-1){
+                found = true;
+            }
+        }
+
+        return values;
+    }
+
+    private String[] splitOcrdText(String ocrdText){
         String[] words = null;
+
         try {
             words = ocrdText.split("\\s+");
         } catch (PatternSyntaxException ex) {
             ex.printStackTrace();
         }
 
-        boolean found = false;
-        LinkedList<String> values = new LinkedList<>();
-        for(String word : words){
-            //System.out.println(word);
-            if(word.equals(fieldName)){
-                found = true;
-            } else if(found){
-                values.add(word);
-                found = false;
-            }
-        }
-        return values;
+        return words;
     }
 
     private boolean checkValue(String fieldName, String textFound){

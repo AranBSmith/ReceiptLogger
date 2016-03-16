@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -25,7 +26,11 @@ public class FieldExtractorTest {
 
     @Before
     public void setup(){
-        AID = "AID";
+        AID = "aid";
+        merchantID = "merchant ID";
+        total = "sale";
+        card = "number";
+
 
         fieldExtractor = new FieldExtractor();
 
@@ -37,15 +42,15 @@ public class FieldExtractorTest {
                 "23 9 DIN Verified 151 3 Please keep the receipt for your racigds H 1203101131 " +
                 "copy";
 
-        // TODO: get something better.
-        prettyGoodOCRText = "11er ik m t x l I I Vl xfi x z l In beAumn Start 2091 igglryl ua Ix" +
-                " SALE Please debit my account A WM 1 EUR220 00 0 VOTAL EUR220 00 1 PIN VERIFIED " +
-                "s Please keep receipt 3 5 z for your records 1 Ev PTID 13333PP80435710 3 HID 3" +
-                " 36314 1 TH 0769 f f Date 05 01 2016 4 Time 18 53 11 1 f Authcode 960175 r x Ref" +
-                " 52 13 AID A0000000031010 APE Seq 09 To an 1W 00000000000019591445 v v v 1 085 r" +
-                " 90 ENE w GEE nn";
+        prettyGoodOCRText = "No Image III I It E L l ru c All 7 T FRENCH CFFE EUR2 30 BEEF SLICES " +
+                "EUR2 40 MARSHMALLOWS x EURO 74 TOTAL EUR5 44 VISADEBIT SALE EUR5 44 AID " +
+                "A0000000031010 NUMBER 2691 ICC PAN SEQ N0 00 AUTH CODE 946459 MERCHANT 75401743 " +
+                "START 11 13 EXPIRY 11 16 Cardholder PIN Verified CHANGE DUE EUR0 00 sIGN UP FOR " +
+                "CLUBCARD You could have earned 5 Ciubcard points in this transaction";
 
         prettyGoodAID = "A0000000031010";
+        prettyGoodCard = "2691";
+        prettyGoodTotal = "eur544";
 
     }
 
@@ -53,6 +58,9 @@ public class FieldExtractorTest {
     public void testPerformFieldExtraction(){
         HashMap<String, String> fields = fieldExtractor.performFieldExtraction(prettyGoodOCRText);
         // Log.v(TEXTEXTRACTION, fields.get(AID)); this causes a bug..
+        assertNotNull(fields.get(AID));
         assertTrue(fields.get(AID).equals(prettyGoodAID));
+        assertTrue(fields.get(total).equals(prettyGoodAID));
+        assertTrue(fields.get(card).equals(prettyGoodAID));
     }
 }
