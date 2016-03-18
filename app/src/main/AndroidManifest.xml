@@ -18,7 +18,9 @@
             </intent-filter>
         </activity>
         <activity android:name="com.aransmith.app.receiptlogger.activities.ActionSet"></activity>
-        <activity android:name="com.aransmith.app.receiptlogger.activities.LogExpense"></activity>
+        <activity android:name=".AutoLogExpense"></activity>
+        <activity android:name=".LogExpenseOptions"></activity>
+
 
     </application>
 

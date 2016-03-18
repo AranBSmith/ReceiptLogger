@@ -8,15 +8,15 @@ import org.junit.Test;
  * Created by Aran on 2/20/2016.
  */
 
-public class WebServiceAccessObjectTest {
+public class WebServiceAccessTest {
 
-    private WebServiceAccessObject wsab;
+    private WebServiceAccess wsab;
     private static final String UNAME = "admin";
     private static final String PWORD = "admin";
 
     @Before
     public void setUp() throws Exception {
-        wsab = new WebServiceAccessObject();
+        wsab = new WebServiceAccess();
     }
 
     @After

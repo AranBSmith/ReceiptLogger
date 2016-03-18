@@ -1,17 +1,17 @@
 package com.aransmith.app.receiptlogger.services;
 
-import com.aransmith.app.receiptlogger.dao.WebServiceAccessObject;
+import com.aransmith.app.receiptlogger.dao.WebServiceAccess;
 
 /**
  * Created by Aran on 2/8/2016.
  */
 public class Login {
 
-    private WebServiceAccessObject wsab;
+    private WebServiceAccess wsab;
     private EmailService emailService;
 
     public Login(){
-        wsab = new WebServiceAccessObject();
+        wsab = new WebServiceAccess();
         emailService = new EmailService();
     }
 

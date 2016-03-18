@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class LogExpense extends Activity {
+public class AutoLogExpense extends Activity {
     public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
-            "/LogExpense/";
+            "/AutoLogExpense/";
 
     public static final String lang = "eng";
 
@@ -46,7 +46,7 @@ public class LogExpense extends Activity {
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
-        boolean hasPermission = (ContextCompat.checkSelfPermission(LogExpense.this,
+        boolean hasPermission = (ContextCompat.checkSelfPermission(AutoLogExpense.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermission) {
             ActivityCompat.requestPermissions(this.getParent() ,
@@ -121,13 +121,13 @@ public class LogExpense extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(LogExpense.PHOTO_TAKEN, photoTaken);
+        outState.putBoolean(AutoLogExpense.PHOTO_TAKEN, photoTaken);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.i(TAG, "onRestoreInstanceState()");
-        if (savedInstanceState.getBoolean(LogExpense.PHOTO_TAKEN)) {
+        if (savedInstanceState.getBoolean(AutoLogExpense.PHOTO_TAKEN)) {
             onPhotoTaken();
         }
     }

@@ -1,0 +1,37 @@
+package com.aransmith.app.receiptlogger.activities;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+
+/**
+ * Created by Aran on 3/18/2016.
+ */
+public class LogExpenseOptions extends Activity {
+    private static final String TAG = "LogExpenseOptions";
+    protected Button autoLogExpense, manualLogExpense;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.log_expense_options);
+
+        autoLogExpense = (Button) findViewById(R.id.automaticLog);
+        manualLogExpense = (Button) findViewById(R.id.manualLog);
+
+        autoLogExpense.setOnClickListener(new automaticLogExpenseClickHandler());
+    }
+
+    public class automaticLogExpenseClickHandler implements View.OnClickListener {
+        public void onClick(View view){
+            Log.i(TAG, "Moving to AutoLogExpense Activity");
+            Intent i = new Intent(getApplicationContext(),AutoLogExpense.class);
+            startActivity(i);
+            // setContentView(R.layout.main);
+        }
+    }
+
+}

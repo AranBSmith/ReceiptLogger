@@ -20,7 +20,7 @@ public class ActionSet extends Activity {
         setContentView(R.layout.actionset);
 
         logExpenseButton = (Button) findViewById(R.id.expenselog);
-        viewExpensesButton = (Button) findViewById(R.id.anotherfunction);
+        viewExpensesButton = (Button) findViewById(R.id.listexpenses);
 
         logExpenseButton.setOnClickListener(new logExpenseClickHandler());
     }
@@ -28,9 +28,9 @@ public class ActionSet extends Activity {
     public class logExpenseClickHandler implements View.OnClickListener {
         public void onClick(View view){
             Log.i(TAG, "logExpenseButton has been pressed. Moving to new activity");
-            Intent i = new Intent(getApplicationContext(),LogExpense.class);
+            Intent i = new Intent(getApplicationContext(),LogExpenseOptions.class);
             startActivity(i);
-            setContentView(R.layout.main);
+            //setContentView(R.layout.main);
         }
     }
 
