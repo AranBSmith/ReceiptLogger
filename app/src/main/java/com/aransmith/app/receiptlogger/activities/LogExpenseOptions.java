@@ -30,8 +30,8 @@ public class LogExpenseOptions extends Activity {
             Log.i(TAG, "Moving to AutoLogExpense Activity");
             Intent i = new Intent(getApplicationContext(),AutoLogExpense.class);
             startActivity(i);
+            // the below line might have been cause of crashes when reversing activities.
             // setContentView(R.layout.main);
         }
     }
-
 }

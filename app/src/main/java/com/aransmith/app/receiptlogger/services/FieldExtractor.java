@@ -35,6 +35,7 @@ public class FieldExtractor {
 
         ocrdText = ocrdText.toLowerCase();
 
+        // aid field
         String AID = "aid";
         // total, amount
         String total = "sale";

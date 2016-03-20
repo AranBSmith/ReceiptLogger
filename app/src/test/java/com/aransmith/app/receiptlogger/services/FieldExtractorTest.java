@@ -34,7 +34,7 @@ public class FieldExtractorTest {
 
         fieldExtractor = new FieldExtractor();
 
-        imperfectOCRText = "No Image l a 1 Q Q w Md1 Stok relanj m i St garets Road 1 F has 1 1 " +
+        imperfectOCRText = "l a 1 Q Q w Md1 Stok relanj m i St garets Road 1 F has 1 1 " +
                 "11 1 5 Dub in 1 3 SAIJEBIT I 1 1 lard number HHHHH QSQI mp w Date 11 16 f App " +
                 "PAN Seq No 00 Merchant ID 677003600007595 1 Fermmal ID 25675942 EH N13 3140 y " +
                 "SALE r if r t Your amount will be de W with the total amoum 1 Goods EUR 2 0 1 V" +
@@ -42,7 +42,7 @@ public class FieldExtractorTest {
                 "23 9 DIN Verified 151 3 Please keep the receipt for your racigds H 1203101131 " +
                 "copy";
 
-        prettyGoodOCRText = "No Image III I It E L l ru c All 7 T FRENCH CFFE EUR2 30 BEEF SLICES " +
+        prettyGoodOCRText = "III I It E L l ru c All 7 T FRENCH CFFE EUR2 30 BEEF SLICES " +
                 "EUR2 40 MARSHMALLOWS x EURO 74 TOTAL EUR5 44 VISADEBIT SALE EUR5 44 AID " +
                 "A0000000031010 NUMBER 2691 ICC PAN SEQ N0 00 AUTH CODE 946459 MERCHANT 75401743 " +
                 "START 11 13 EXPIRY 11 16 Cardholder PIN Verified CHANGE DUE EUR0 00 sIGN UP FOR " +
