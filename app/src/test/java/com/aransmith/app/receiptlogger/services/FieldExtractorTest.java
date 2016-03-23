@@ -23,6 +23,7 @@ public class FieldExtractorTest {
     String merchantID, prettyGoodMerchantID, imperfectMerchantID;
     String total, prettyGoodTotal, imperfectTotal;
     String card, prettyGoodCard, imperfectCard;
+    String[] prettyGoodOcrdArray;
 
     @Before
     public void setup(){
@@ -52,9 +53,10 @@ public class FieldExtractorTest {
         prettyGoodCard = "2691";
         prettyGoodTotal = "eur544";
 
+        prettyGoodOcrdArray = prettyGoodOCRText.split("\\s+");
     }
 
-    @Test
+   /* @Test
     public void testPerformFieldExtraction(){
         HashMap<String, String> fields = fieldExtractor.performFieldExtraction(prettyGoodOCRText);
         // Log.v(TEXTEXTRACTION, fields.get(AID)); this causes a bug..
@@ -62,5 +64,30 @@ public class FieldExtractorTest {
         assertTrue(fields.get(AID).equals(prettyGoodAID));
         assertTrue(fields.get(total).equals(prettyGoodAID));
         assertTrue(fields.get(card).equals(prettyGoodAID));
+    }*/
+
+    @Test
+    public void testGetPrice(){
+        HashMap<String,String> priceInformation =
+                fieldExtractor.getPrice(prettyGoodOCRText.toLowerCase().split("\\s+"));
+        assertNotNull(priceInformation);
+        String price = priceInformation.get("amount");
+        System.out.println(price);
+        assertTrue(price.equals("eur5.44"));
+    }
+
+    @Test
+    public void testGetNextConsecutiveMembers() {
+        String result = fieldExtractor.getNextConsecutiveMembers(prettyGoodOcrdArray,23,2,".");
+        System.out.println("Caught: " + result);
+        System.out.println(prettyGoodOcrdArray[23]);
+        System.out.println(prettyGoodOcrdArray[24]);
+        System.out.println(prettyGoodOcrdArray[25]);
+        assertTrue(result.equals("EUR5.44"));
+    }
+
+    @Test
+    public void testCheckPriceFormat(){
+        assertTrue(fieldExtractor.checkPriceFormat("EUR5.44"));
     }
 }

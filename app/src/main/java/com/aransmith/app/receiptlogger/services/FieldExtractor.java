@@ -1,5 +1,7 @@
 package com.aransmith.app.receiptlogger.services;
 
+import com.aransmith.app.receiptlogger.model.PriceField;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.regex.PatternSyntaxException;
@@ -29,7 +31,7 @@ public class FieldExtractor {
 
     StringComparison stringComparison;
 
-    HashMap<String, String> performFieldExtraction(String ocrdText){
+   /* HashMap<String, String> performFieldExtraction(String ocrdText){
 
         HashMap<String, String> fields = new HashMap<>();
 
@@ -42,14 +44,14 @@ public class FieldExtractor {
         // number, visadebit
         String cardNumber = "number";
 
-        fields.put(AID, getField(AID, ocrdText));
+        *//*fields.put(AID, getField(AID, ocrdText));
         fields.put(total, getField(total, ocrdText));
-        fields.put(cardNumber, getField(cardNumber, ocrdText));
+        fields.put*//*(cardNumber, getField(cardNumber, ocrdText));
 
         return fields;
-    }
+    }*/
 
-    private String getField(String fieldName, String ocrdText){
+  /*  private String getField(String fieldName, String ocrdText){
         String value = "";
         LinkedList<String> fieldValues = firstPass(fieldName, ocrdText);
 
@@ -73,7 +75,70 @@ public class FieldExtractor {
         }
 
         return value;
+    }*/
+
+    public HashMap<String,String> getPrice(String[] words){
+
+        HashMap<String,String> priceInformation = new HashMap<>();
+        PriceField priceField = new PriceField();
+        String amount = "";
+        String currency;
+        boolean found;
+
+        // perform a firstpass of the ocrdtext
+
+        int i = 0 ;
+        for(String word : words){
+            // price field found, obtain the next two strings in array as they correspond to something
+            // like EUR9 99
+            if (priceField.equals(word)){
+                amount = getNextConsecutiveMembers(words, i, 2, ".");
+
+                // check if the amount is of the right format
+                if(!checkPriceFormat(amount)){
+
+                    // check if the format is 9.99 rather than EUR9.99
+                    if(!amount.matches("(\\d+(.)(\\d+))")){
+                        System.out.println("The format is neither what is expected. Must perform price" +
+                                " recovery or search elsewhere for the end price.");
+                    }
+                }
+                // get currency
+                currency = amount.substring(0,2);
+
+                System.out.println("Currency is found to be: " + currency);
+
+                // add currency and amount to hashmap
+                priceInformation.put("currency", currency);
+                priceInformation.put("amount", amount);
+                found = true;
+            }
+            i++;
+        }
+
+        System.out.println("Amount was found to be: " + amount);
+
+        return priceInformation;
     }
+
+    public boolean checkPriceFormat(String price){
+        return price.matches("([a-zA-Z]{3}\\d+(.)(\\d+))");
+    }
+
+    public String getNextConsecutiveMembers(String[] words, int pos, int amount, String seperator) {
+        String result = "";
+
+        int i = 0;
+        while(i < amount){
+            result = result + seperator + words[pos+ i + 1];
+            i++;
+        }
+
+        result = result.substring(1);
+
+        return result;
+    }
+
 
     /**
      * Method used by performFieldExtraction to find a relevent field,
@@ -87,8 +152,10 @@ public class FieldExtractor {
      */
     private LinkedList<String> firstPass(String fieldName, String ocrdText){
         String[] words = splitOcrdText(ocrdText);
-
         boolean found = false;
+
+
+        /*boolean found = false;
         LinkedList<String> values = new LinkedList<>();
 
         int i = 0;
@@ -110,8 +177,8 @@ public class FieldExtractor {
             }
 
             i++;
-        }
-        return values;
+        }*/
+        return null;
     }
 
     private LinkedList<String> secondPass(String fieldName, String ocrdText){

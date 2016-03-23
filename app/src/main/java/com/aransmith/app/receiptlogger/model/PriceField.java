@@ -20,8 +20,15 @@ public class PriceField {
     }
 
     public boolean equals(String word){
-
-
-        return false;
+        return (
+                word.equals(sale) ||
+                word.equals(totalAmount) ||
+                word.equals(amountDue) ||
+                word.equals(total) ||
+                word.equals(totalDue) ||
+                word.equals(visaDebitSale) ||
+                word.equals(saleAmount) ||
+                word.equals(cardSales)
+        );
     }
 }
