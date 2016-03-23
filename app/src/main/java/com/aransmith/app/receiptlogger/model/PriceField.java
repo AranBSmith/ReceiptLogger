@@ -1,34 +1,44 @@
 package com.aransmith.app.receiptlogger.model;
 
+import com.aransmith.app.receiptlogger.services.StringComparison;
+
 /**
  * Created by Aran on 3/20/2016.
  */
 public class PriceField {
-
-    private String sale, totalAmount, amountDue, total, visaDebitSale, saleAmount, cardSales,
-        totalDue;
+    private String[] fieldNames;
+    private StringComparison stringComparison;
 
     public PriceField(){
-        sale = "sale";
-        totalAmount = "total amount";
-        amountDue = "amount due";
-        total = "total";
-        totalDue = "total due";
-        visaDebitSale = "visadebit sale";
-        saleAmount = "sale amount";
-        cardSales = "card sales";
+        fieldNames = new String[] {"sale", "total amount", "amount due", "total", "total due",
+                                    "visadebit sale", "sale amount", "card sales"};
     }
 
     public boolean equals(String word){
-        return (
-                word.equals(sale) ||
-                word.equals(totalAmount) ||
-                word.equals(amountDue) ||
-                word.equals(total) ||
-                word.equals(totalDue) ||
-                word.equals(visaDebitSale) ||
-                word.equals(saleAmount) ||
-                word.equals(cardSales)
-        );
+        for(String field: fieldNames){
+            if(field.equals(word)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int compare(String word){
+        stringComparison = new StringComparison();
+
+        int score = 5000;
+        boolean match = false;
+
+        // find a VALID field
+        for(String field: fieldNames){
+            int t = stringComparison.stringCompare(field, word);
+            if(t > -1 && t < score){
+                score = t;
+                match = true;
+            }
+        }
+        if(match) return score;
+
+        else return -1;
     }
 }

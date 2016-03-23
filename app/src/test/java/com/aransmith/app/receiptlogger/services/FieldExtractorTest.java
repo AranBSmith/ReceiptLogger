@@ -19,6 +19,7 @@ public class FieldExtractorTest {
     FieldExtractor fieldExtractor;
 
     String imperfectOCRText, prettyGoodOCRText;
+    String noPerfectPriceField;
     String AID, prettyGoodAID, imperfectAID;
     String merchantID, prettyGoodMerchantID, imperfectMerchantID;
     String total, prettyGoodTotal, imperfectTotal;
@@ -35,13 +36,19 @@ public class FieldExtractorTest {
 
         fieldExtractor = new FieldExtractor();
 
-        imperfectOCRText = "l a 1 Q Q w Md1 Stok relanj m i St garets Road 1 F has 1 1 " +
-                "11 1 5 Dub in 1 3 SAIJEBIT I 1 1 lard number HHHHH QSQI mp w Date 11 16 f App " +
-                "PAN Seq No 00 Merchant ID 677003600007595 1 Fermmal ID 25675942 EH N13 3140 y " +
-                "SALE r if r t Your amount will be de W with the total amoum 1 Goods EUR 2 0 1 V" +
-                " 100 Authormation code 605442 1 1 IUD 10000000031010 1 V AED g g 1010 20161128 " +
-                "23 9 DIN Verified 151 3 Please keep the receipt for your racigds H 1203101131 " +
-                "copy";
+        noPerfectPriceField = "I II R E L A N D I WEETABIX EURS 9 T MILK 3LTR EURZJQ MANGO EU 00 " +
+                "ICING SUGAR EUR 09 MILK CHOC EUROVBQ MILK CHOC Un t 9 MILK CHOC EURO b5 MILK CH" +
+                " EURO 9 MILK CHI EUQO 59 PORK PIES EUR 50 DNVDELICKDM E094 00 CH1CKEN NR ERIN SE5" +
+                " 38 LF 071 39 RADIUM BA Em1 99 OTAL ELR29 80 AID WWI 331010 " +
+                "W IItIIIIllIll2691 ICC PAN SEO 0 oo AUTH out 33442 s um 11 13 EXPIRY 11 15 V " +
+                "Carmggr pIN Vormod EURO 00 W P on CLIBC l 31 You 099 E d 29 ARI";
+
+        imperfectOCRText = "I II R E L A N D I WEETABIX EURS 9 T MILK 3LTR EURZJQ MANGO EU 00 " +
+                "ICING SUGAR EUR 09 MILK CHOC EUROVBQ MILK CHOC Un t 9 MILK CHOC EURO b5 MILK CH" +
+                " EURO 9 MILK CHI EUQO 59 PORK PIES EUR 50 DNVDELICKDM E094 00 CH1CKEN NR ERIN SE5" +
+                " 38 LF 071 39 RADIUM BA Em1 99 OTAL ELR29 80 VISAMBU SALE 29 80 AID WWI 331010 " +
+                "W IItIIIIllIll2691 ICC PAN SEO 0 oo AUTH out 33442 s um 11 13 EXPIRY 11 15 V " +
+                "Carmggr pIN Vormod EURO 00 W P on CLIBC l 31 You 099 E d 29 ARI";
 
         prettyGoodOCRText = "III I It E L l ru c All 7 T FRENCH CFFE EUR2 30 BEEF SLICES " +
                 "EUR2 40 MARSHMALLOWS x EURO 74 TOTAL EUR5 44 VISADEBIT SALE EUR5 44 AID " +
@@ -68,12 +75,29 @@ public class FieldExtractorTest {
 
     @Test
     public void testGetPrice(){
+        // perform field extraction
+
+        // this segment is concerned with testing on ocr text that isn't too corrupt
         HashMap<String,String> priceInformation =
                 fieldExtractor.getPrice(prettyGoodOCRText.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         String price = priceInformation.get("amount");
-        System.out.println(price);
+        System.out.println("Price information from pretty good ocr: " + price);
         assertTrue(price.equals("eur5.44"));
+
+        // this segment is concerned with testing on ocr text is imperfect
+        priceInformation = fieldExtractor.getPrice(imperfectOCRText.toLowerCase().split("\\s+"));
+        assertNotNull(priceInformation);
+        price = priceInformation.get("amount");
+        System.out.println("Price information from imperfect ocr: " + price);
+        assertTrue(price.equals("29.80"));
+
+        // this segment is concerned with testing on ocr text that has no perfect price field
+        priceInformation = fieldExtractor.getPrice(noPerfectPriceField.toLowerCase().split("\\s+"));
+        assertNotNull(priceInformation);
+        price = priceInformation.get("amount");
+        System.out.println("Price information from noperfectpricefield ocr: " + price);
+        assertTrue(price.equals("elr29.80"));
     }
 
     @Test

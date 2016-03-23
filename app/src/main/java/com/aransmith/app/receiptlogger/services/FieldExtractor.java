@@ -31,59 +31,13 @@ public class FieldExtractor {
 
     StringComparison stringComparison;
 
-   /* HashMap<String, String> performFieldExtraction(String ocrdText){
-
-        HashMap<String, String> fields = new HashMap<>();
-
-        ocrdText = ocrdText.toLowerCase();
-
-        // aid field
-        String AID = "aid";
-        // total, amount
-        String total = "sale";
-        // number, visadebit
-        String cardNumber = "number";
-
-        *//*fields.put(AID, getField(AID, ocrdText));
-        fields.put(total, getField(total, ocrdText));
-        fields.put*//*(cardNumber, getField(cardNumber, ocrdText));
-
-        return fields;
-    }*/
-
-  /*  private String getField(String fieldName, String ocrdText){
-        String value = "";
-        LinkedList<String> fieldValues = firstPass(fieldName, ocrdText);
-
-        // perform the first pass.
-        if(fieldValues.size() == 1){
-            value = fieldValues.getFirst();
-        }
-
-        else if(fieldValues.size() > 1){
-
-        }
-
-        // need to perform a more sophisticated search, perform a second pass.
-        else if(fieldValues.size() == 0){
-            secondPass(fieldName, ocrdText);
-        }
-
-        // need to perform a more sophisticated search, perform a third pass.
-        else {
-
-        }
-
-        return value;
-    }*/
-
     public HashMap<String,String> getPrice(String[] words){
 
         HashMap<String,String> priceInformation = new HashMap<>();
         PriceField priceField = new PriceField();
         String amount = "";
         String currency;
-        boolean found;
+        boolean found = false;
 
         // perform a firstpass of the ocrdtext
 
@@ -116,6 +70,60 @@ public class FieldExtractor {
             i++;
         }
 
+        if(!found){
+            stringComparison = new StringComparison();
+            int pos = 0;
+            int bestScore = -1;
+            int candidatePos = -1;
+            String bestCandidate = null;
+            boolean candidateFound = false;
+
+            // search through all the words for the usual field name for a price and note its
+            // position
+            for(String word: words){
+                int score = priceField.compare(word);
+
+                // a likely candidate was found, store the word at this position, with its score
+                if(score != -1 && (bestCandidate == null || score < bestScore)){
+                    bestScore = score;
+                    bestCandidate = word;
+                    candidatePos = pos;
+                    candidateFound = true;
+                }
+                pos++;
+            }
+
+            if(candidateFound && candidatePos != -1) {
+                System.out.println("The best candidate found was: " + bestCandidate);
+
+                amount = getNextConsecutiveMembers(words, candidatePos, 2, ".");
+
+                System.out.println("Amount found was from imperfectpricefieldocr: " + amount);
+                // check if the amount is of the right format
+                if (!checkPriceFormat(amount)) {
+
+                    // check if the format is 9.99 rather than EUR9.99
+                    if (!amount.matches("(\\d+(.)(\\d+))")) {
+                        System.out.println("The format is neither what is expected. Must perform price" +
+                                " recovery or search elsewhere for the end price.");
+                    }
+                }
+                // get currency
+                if (!amount.equals("")) {
+                    currency = amount.substring(0, 2);
+
+                    System.out.println("Currency is found to be: " + currency);
+
+                    // add currency and amount to hashmap
+                    priceInformation.put("currency", currency);
+                    priceInformation.put("amount", amount);
+                    found = true;
+                }
+            } else {
+                System.out.println("No candidate found on second pass.");
+            }
+        }
+
         System.out.println("Amount was found to be: " + amount);
 
         return priceInformation;
@@ -127,15 +135,19 @@ public class FieldExtractor {
 
     public String getNextConsecutiveMembers(String[] words, int pos, int amount, String seperator) {
         String result = "";
+        try{
 
-        int i = 0;
-        while(i < amount){
-            result = result + seperator + words[pos+ i + 1];
-            i++;
+
+            int i = 0;
+            while(i < amount){
+                result = result + seperator + words[pos+ i + 1];
+                i++;
+            }
+
+            result = result.substring(1);
+        } catch(ArrayIndexOutOfBoundsException e){
+            return result;
         }
-
-        result = result.substring(1);
-
         return result;
     }
 
@@ -218,5 +230,14 @@ public class FieldExtractor {
 
     private boolean checkValue(String fieldName, String textFound){
         return true;
+    }
+
+    public HashMap<String, String> getFields(String ocrdText){
+        // split text and pass into each getField function
+
+        String[] splitOcrdText = splitOcrdText(ocrdText);
+        HashMap<String,String> priceInfo = getPrice(splitOcrdText);
+
+        return priceInfo;
     }
 }

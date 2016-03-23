@@ -17,6 +17,7 @@ import android.widget.EditText;
 
 import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
 import com.aransmith.app.receiptlogger.services.DirectoryCreate;
+import com.aransmith.app.receiptlogger.services.FieldExtractor;
 import com.aransmith.app.receiptlogger.services.PerformOCR;
 import com.aransmith.app.receiptlogger.services.PhotoOrient;
 
@@ -25,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 public class AutoLogExpense extends Activity {
     public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
@@ -40,6 +42,8 @@ public class AutoLogExpense extends Activity {
     protected EditText textField;
     protected String path;
     protected boolean photoTaken;
+
+    private FieldExtractor fieldExtractor;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -140,7 +144,7 @@ public class AutoLogExpense extends Activity {
         PerformOCR performOCR = new PerformOCR(bitmap, lang, DATA_PATH);
         String expenseText = performOCR.performOCR();
 
-        //Log.v(TAG, "OCRED TEXT: " + expenseText);
+        // Log.v(TAG, "OCRED TEXT: " + expenseText);
 
         if ( lang.equalsIgnoreCase("eng") ) {
             expenseText = expenseText.replaceAll("[^a-zA-Z0-9]+", " ");
@@ -149,9 +153,18 @@ public class AutoLogExpense extends Activity {
         expenseText = expenseText.trim();
 
         if ( expenseText.length() != 0 ) {
-            textField.setText(textField.getText().toString().length() == 0 ? expenseText : textField.getText()
-                    + " " + expenseText);
+            fieldExtractor = new FieldExtractor();
+
+            textField.setText(textField.getText().toString().length() == 0 ? expenseText :
+                    textField.getText() + " " + expenseText);
             textField.setSelection(textField.getText().toString().length());
+
+
+            // set price field to price foun
+            System.out.println(expenseText);
+            HashMap<String,String> priceInfo = fieldExtractor.getFields(expenseText);
+
+            System.out.println("price information is: " + priceInfo);
         }
     }
 }
