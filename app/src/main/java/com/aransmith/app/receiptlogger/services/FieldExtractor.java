@@ -93,6 +93,7 @@ public class FieldExtractor {
                 pos++;
             }
 
+            //
             if(candidateFound && candidatePos != -1) {
                 System.out.println("The best candidate found was: " + bestCandidate);
 

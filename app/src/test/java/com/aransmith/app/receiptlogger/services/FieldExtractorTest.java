@@ -33,6 +33,7 @@ public class FieldExtractorTest {
         total = "sale";
         card = "number";
 
+        //
 
         fieldExtractor = new FieldExtractor();
 
