@@ -19,7 +19,7 @@ public class FieldExtractorTest {
     FieldExtractor fieldExtractor;
 
     String imperfectOCRText, prettyGoodOCRText;
-    String noPerfectPriceField;
+    String noPerfectPriceField, ocrSample1;
     String AID, prettyGoodAID, imperfectAID;
     String merchantID, prettyGoodMerchantID, imperfectMerchantID;
     String total, prettyGoodTotal, imperfectTotal;
@@ -32,8 +32,6 @@ public class FieldExtractorTest {
         merchantID = "merchant ID";
         total = "sale";
         card = "number";
-
-        //
 
         fieldExtractor = new FieldExtractor();
 
@@ -57,6 +55,15 @@ public class FieldExtractorTest {
                 "START 11 13 EXPIRY 11 16 Cardholder PIN Verified CHANGE DUE EUR0 00 sIGN UP FOR " +
                 "CLUBCARD You could have earned 5 Ciubcard points in this transaction";
 
+        ocrSample1 = "AAAAAAMKAAKA yum AX AAJ V m r A m 19 24 W Bg g y Vul MAR Ll r mu fun In" +
+                " a Al litfv lk 7 18Lto VULNAL rm pr K gum TU AA AAAAAAAA a A AAKAAAAKAAA A SYGB" +
+                " Mai r u 220 00 g 34 Intel i gs 2 HI VISA 220 UU u have pc V IBNJHH check in up" +
+                " Arxtxkxx269 Stdl t ant xx see The St Expi ry xw xx ICC SALE Please mm 1 my " +
+                "account Amount EUR220 00 a currency TOTAL EUR220 00 PIN VERIFIED P1 ease keep " +
+                "recei p1 for your records PTID 13333PP80435710 Goo MID xxm36314 0mg Date 1 Time " +
+                "18 53 11 V Authcode 960176 Total Ref 52 13 AID A0000000031010 Ap Seq 00 Tofu To " +
+                "en 00000000000019591446 CODE RAIE GROSS VAT 0 23 0 6 220 00 41 14 mum n A no 1 f";
+
         prettyGoodAID = "A0000000031010";
         prettyGoodCard = "2691";
         prettyGoodTotal = "eur544";
@@ -64,7 +71,7 @@ public class FieldExtractorTest {
         prettyGoodOcrdArray = prettyGoodOCRText.split("\\s+");
     }
 
-   /* @Test
+   /*@Test
     public void testPerformFieldExtraction(){
         HashMap<String, String> fields = fieldExtractor.performFieldExtraction(prettyGoodOCRText);
         // Log.v(TEXTEXTRACTION, fields.get(AID)); this causes a bug..
@@ -79,6 +86,7 @@ public class FieldExtractorTest {
         // perform field extraction
 
         // this segment is concerned with testing on ocr text that isn't too corrupt
+        System.out.println("====Performing fieldExtraction on perfect string====");
         HashMap<String,String> priceInformation =
                 fieldExtractor.getPrice(prettyGoodOCRText.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
@@ -87,6 +95,7 @@ public class FieldExtractorTest {
         assertTrue(price.equals("eur5.44"));
 
         // this segment is concerned with testing on ocr text is imperfect
+        System.out.println("====Performing fieldExtraction on imperfect string====");
         priceInformation = fieldExtractor.getPrice(imperfectOCRText.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
@@ -94,15 +103,27 @@ public class FieldExtractorTest {
         assertTrue(price.equals("29.80"));
 
         // this segment is concerned with testing on ocr text that has no perfect price field
+        System.out.println("====Performing fieldExtraction on noperfectpricefield string====");
         priceInformation = fieldExtractor.getPrice(noPerfectPriceField.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from noperfectpricefield ocr: " + price);
         assertTrue(price.equals("elr29.80"));
+
+        // this segment is concerned with testing on ocr text that has no perfect price field
+        System.out.println("====Performing fieldExtraction on ocrSample1 string====");
+        priceInformation = fieldExtractor.getPrice(ocrSample1.toLowerCase().split("\\s+"));
+        assertNotNull(priceInformation);
+        price = priceInformation.get("amount");
+        System.out.println("Price information from ocrSample1 ocr: " + price);
+        assertTrue(price.equals("eur220.00"));
     }
+
+
 
     @Test
     public void testGetNextConsecutiveMembers() {
+        System.out.println("===testGetNextConsecutiveMembers===");
         String result = fieldExtractor.getNextConsecutiveMembers(prettyGoodOcrdArray,23,2,".");
         System.out.println("Caught: " + result);
         System.out.println(prettyGoodOcrdArray[23]);

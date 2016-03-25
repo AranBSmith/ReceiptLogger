@@ -40,7 +40,6 @@ public class FieldExtractor {
         boolean found = false;
 
         // perform a firstpass of the ocrdtext
-
         int i = 0 ;
         for(String word : words){
             // price field found, obtain the next two strings in array as they correspond to something
@@ -52,25 +51,33 @@ public class FieldExtractor {
                 if(!checkPriceFormat(amount)){
 
                     // check if the format is 9.99 rather than EUR9.99
-                    if(!amount.matches("(\\d+(.)(\\d+))")){
-                        System.out.println("The format is neither what is expected. Must perform price" +
-                                " recovery or search elsewhere for the end price.");
+                    System.out.println("Checking if amount is of the right format.");
+                    if(amount.matches("(\\d+(.)(\\d+))")){
+                        priceInformation.put("amount", amount);
+                        found = true;
                     }
                 }
-                // get currency
-                currency = amount.substring(0,2);
 
-                System.out.println("Currency is found to be: " + currency);
+                // otherwise it is of the right format EUR9.99
+                else if(checkPriceFormat(amount)) {
+                    System.out.println("Amount is of the right format.");
+                    // get currency
+                    currency = amount.substring(0,3);
 
-                // add currency and amount to hashmap
-                priceInformation.put("currency", currency);
-                priceInformation.put("amount", amount);
-                found = true;
+                    System.out.println("Currency is found to be: " + currency);
+
+                    // add currency and amount to hashmap
+                    priceInformation.put("currency", currency);
+                    priceInformation.put("amount", amount);
+                    found = true;
+                }
             }
             i++;
         }
 
         if(!found){
+            System.out.println("===No perfect price field was found, performing a second pass===");
+
             stringComparison = new StringComparison();
             int pos = 0;
             int bestScore = -1;
@@ -81,39 +88,56 @@ public class FieldExtractor {
             // search through all the words for the usual field name for a price and note its
             // position
             for(String word: words){
+
+            // find the best candidate based off levenshtein distance
                 int score = priceField.compare(word);
 
                 // a likely candidate was found, store the word at this position, with its score
                 if(score != -1 && (bestCandidate == null || score < bestScore)){
-                    bestScore = score;
-                    bestCandidate = word;
-                    candidatePos = pos;
-                    candidateFound = true;
+                    // check if it is in fact a price amount
+                    String test = getNextConsecutiveMembers(words, pos, 2, ".");
+
+                    System.out.println("2ndP: Found a likely candidate: " + word + " " + test);
+
+                    if(checkPriceFormat(test) || test.matches("(\\d+(.)(\\d+))")){
+
+                        System.out.println("2ndP: its format is what we are looking for.");
+
+                        bestScore = score;
+                        bestCandidate = word;
+                        candidatePos = pos;
+                        candidateFound = true;
+
+                        System.out.println("2ndP: Candidate " + bestCandidate + " will be considered");
+                    }
                 }
                 pos++;
             }
 
-            //
             if(candidateFound && candidatePos != -1) {
-                System.out.println("The best candidate found was: " + bestCandidate);
+                System.out.println("2ndP: The best candidate found was: " + bestCandidate);
 
                 amount = getNextConsecutiveMembers(words, candidatePos, 2, ".");
 
-                System.out.println("Amount found was from imperfectpricefieldocr: " + amount);
+                System.out.println("2ndP: Amount found was from imperfectpricefieldocr: " + amount);
                 // check if the amount is of the right format
                 if (!checkPriceFormat(amount)) {
 
                     // check if the format is 9.99 rather than EUR9.99
-                    if (!amount.matches("(\\d+(.)(\\d+))")) {
-                        System.out.println("The format is neither what is expected. Must perform price" +
-                                " recovery or search elsewhere for the end price.");
+                    System.out.println("2ndP: Checking if amount is of the right format: e.g. : 9.99.");
+                    if (amount.matches("(\\d+(.)(\\d+))")) {
+                        System.out.println("2ndP: " + amount + " was found to be of the right format.");
+                        priceInformation.put("amount", amount);
+                        found = true;
                     }
                 }
-                // get currency
-                if (!amount.equals("")) {
-                    currency = amount.substring(0, 2);
 
-                    System.out.println("Currency is found to be: " + currency);
+                else if(checkPriceFormat(amount)){
+                    System.out.println("2ndP: Amount is of the right format.");
+                    // get currency
+                    currency = amount.substring(0, 3);
+
+                    System.out.println("2ndP: Currency is found to be: " + currency);
 
                     // add currency and amount to hashmap
                     priceInformation.put("currency", currency);
@@ -121,17 +145,24 @@ public class FieldExtractor {
                     found = true;
                 }
             } else {
-                System.out.println("No candidate found on second pass.");
+                System.out.println("2ndP: No candidate found on second pass.");
             }
         }
 
-        System.out.println("Amount was found to be: " + amount);
+        // System.out.println("Amount was found to be: " + amount);
 
         return priceInformation;
     }
 
     public boolean checkPriceFormat(String price){
-        return price.matches("([a-zA-Z]{3}\\d+(.)(\\d+))");
+        boolean check = price.matches("([a-zA-Z]{3}\\d+(.)(\\d+))");
+        if (check){
+            System.out.println("checkPriceFormat: information: " + price + " is of the right format");
+            return true;
+        } else {
+            System.out.println("checkPriceFormat: " + price + " was not of the right format.");
+            return false;
+        }
     }
 
     public String getNextConsecutiveMembers(String[] words, int pos, int amount, String seperator) {
@@ -236,6 +267,7 @@ public class FieldExtractor {
     public HashMap<String, String> getFields(String ocrdText){
         // split text and pass into each getField function
 
+        ocrdText = ocrdText.toLowerCase();
         String[] splitOcrdText = splitOcrdText(ocrdText);
         HashMap<String,String> priceInfo = getPrice(splitOcrdText);
 

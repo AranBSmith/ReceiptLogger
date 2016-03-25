@@ -11,7 +11,8 @@ public class PriceField {
 
     public PriceField(){
         fieldNames = new String[] {"sale", "total amount", "amount due", "total", "total due",
-                                    "visadebit sale", "sale amount", "card sales"};
+                                    "visadebit sale", "sale amount", "card sales", "goods value",
+                                        "amount"};
     }
 
     public boolean equals(String word){

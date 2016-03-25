@@ -160,7 +160,7 @@ public class AutoLogExpense extends Activity {
             textField.setSelection(textField.getText().toString().length());
 
 
-            // set price field to price foun
+            // set price field to price found
             System.out.println(expenseText);
             HashMap<String,String> priceInfo = fieldExtractor.getFields(expenseText);
 

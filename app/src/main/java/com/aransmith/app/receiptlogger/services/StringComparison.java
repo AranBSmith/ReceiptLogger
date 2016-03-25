@@ -18,7 +18,14 @@ public class StringComparison {
      * too dissimilar. This happens when the amount of changes need to
      * turn first to second is second.length()-1 steps.
      */
+
+    private final int ACCURACY = 4;
+
     public int stringCompare(String first, String second){
-        return getLevenshteinDistance(first, second, second.length()-1);
+
+        int firstLength = second.length();
+        int flexibility = firstLength/ACCURACY;
+
+        return getLevenshteinDistance(first, second, flexibility);
     }
 }
