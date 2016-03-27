@@ -31,6 +31,11 @@ public class FieldExtractor {
 
     StringComparison stringComparison;
 
+    public String getDate(String[] words){
+
+        return null;
+    }
+
     public HashMap<String,String> getPrice(String[] words){
 
         HashMap<String,String> priceInformation = new HashMap<>();
@@ -39,7 +44,7 @@ public class FieldExtractor {
         String currency;
         boolean found = false;
 
-        // perform a firstpass of the ocrdtext
+        // perform a firstpass of the ocrdtext, this assumes our pricefields aren't corrupt
         int i = 0 ;
         for(String word : words){
             // price field found, obtain the next two strings in array as they correspond to something
@@ -72,8 +77,41 @@ public class FieldExtractor {
                     found = true;
                 }
             }
+
+
+            else if(i != words.length-1 && priceField.equals(word+words[i+1])){
+                System.out.println("Price field comprises of two strings: " + word+words[i+1]);
+                amount = getNextConsecutiveMembers(words, i + 1, 2, ".");
+
+                // check if the amount is of the right format
+                if(!checkPriceFormat(amount)){
+
+                    // check if the format is 9.99 rather than EUR9.99
+                    System.out.println("Checking if amount is of the right format.");
+                    if(amount.matches("(\\d+(.)(\\d+))")){
+                        priceInformation.put("amount", amount);
+                        found = true;
+                    }
+                }
+
+                // otherwise it is of the right format EUR9.99
+                else if(checkPriceFormat(amount)) {
+                    System.out.println("Amount is of the right format.");
+                    // get currency
+                    currency = amount.substring(0,3);
+
+                    System.out.println("Currency is found to be: " + currency);
+
+                    // add currency and amount to hashmap
+                    priceInformation.put("currency", currency);
+                    priceInformation.put("amount", amount);
+                    found = true;
+                }
+            }
+
             i++;
         }
+
 
         if(!found){
             System.out.println("===No perfect price field was found, performing a second pass===");
@@ -84,6 +122,7 @@ public class FieldExtractor {
             int candidatePos = -1;
             String bestCandidate = null;
             boolean candidateFound = false;
+            int candidateLength = 1;
 
             // search through all the words for the usual field name for a price and note its
             // position
@@ -92,8 +131,10 @@ public class FieldExtractor {
             // find the best candidate based off levenshtein distance
                 int score = priceField.compare(word);
 
-                // a likely candidate was found, store the word at this position, with its score
                 if(score != -1 && (bestCandidate == null || score < bestScore)){
+                    // a likely candidate was found of one word, store the word at this position,
+                    // with its score
+
                     // check if it is in fact a price amount
                     String test = getNextConsecutiveMembers(words, pos, 2, ".");
 
@@ -111,10 +152,45 @@ public class FieldExtractor {
                         System.out.println("2ndP: Candidate " + bestCandidate + " will be considered");
                     }
                 }
+
+                // the score wasn't as good as what is currently found, try to see if it is two words
+                // long
+
+                if(pos != words.length-1) {
+                    score = priceField.compare(word+words[pos+1]);
+                    //System.out.println("The score of " +)
+                }
+
+
+                if(score != -1 && (bestCandidate == null || score < bestScore)){
+                    // a likely candidate was found of two words in length, store the word at this position,
+                    // with its score
+
+                    // check if it is in fact a price amount
+                    String test = getNextConsecutiveMembers(words, pos+1, 2, ".");
+
+                    System.out.println("2ndP: Found a likely candidate: " + word + words[pos+1] +
+                            " " + test);
+
+                    if(checkPriceFormat(test) || test.matches("(\\d+(.)(\\d+))")){
+
+                        System.out.println("2ndP: its format is what we are looking for.");
+
+                        bestScore = score;
+                        bestCandidate = word + words[pos+1];
+                        candidatePos = pos+1;
+                        candidateFound = true;
+                        candidateLength = 2;
+
+                        System.out.println("2ndP: Candidate " + bestCandidate + " will be considered");
+                    }
+                }
+
                 pos++;
             }
 
             if(candidateFound && candidatePos != -1) {
+
                 System.out.println("2ndP: The best candidate found was: " + bestCandidate);
 
                 amount = getNextConsecutiveMembers(words, candidatePos, 2, ".");

@@ -19,7 +19,7 @@ public class FieldExtractorTest {
     FieldExtractor fieldExtractor;
 
     String imperfectOCRText, prettyGoodOCRText;
-    String noPerfectPriceField, ocrSample1;
+    String noPerfectPriceField, ocrSample1, ocrSample2;
     String AID, prettyGoodAID, imperfectAID;
     String merchantID, prettyGoodMerchantID, imperfectMerchantID;
     String total, prettyGoodTotal, imperfectTotal;
@@ -60,6 +60,15 @@ public class FieldExtractorTest {
                 " Mai r u 220 00 g 34 Intel i gs 2 HI VISA 220 UU u have pc V IBNJHH check in up" +
                 " Arxtxkxx269 Stdl t ant xx see The St Expi ry xw xx ICC SALE Please mm 1 my " +
                 "account Amount EUR220 00 a currency TOTAL EUR220 00 PIN VERIFIED P1 ease keep " +
+                "recei p1 for your records PTID 13333PP80435710 Goo MID xxm36314 0mg Date 1 Time " +
+                "18 53 11 V Authcode 960176 Total Ref 52 13 AID A0000000031010 Ap Seq 00 Tofu To " +
+                "en 00000000000019591446 CODE RAIE GROSS VAT 0 23 0 6 220 00 41 14 mum n A no 1 f";
+
+        ocrSample2 = "AAAAAAMKAAKA yum AX AAJ V m r A m 19 24 W Bg g y Vul MAR Ll r mu fun In" +
+                " a Al litfv lk 7 18Lto VULNAL rm pr K gum TU AA AAAAAAAA a A AAKAAAAKAAA A SYGB" +
+                " Mai r u 220 00 g 34 Intel i gs 2 HI VISA 220 UU u have pc V IBNJHH check in up" +
+                " Arxtxkxx269 Stdl t ant xx see The St Expi ry xw xx ICC SALE Please mm 1 my " +
+                "account a currency V1SADEBIT SA13 EUR220 00 PIN VERIFIED P1 ease keep " +
                 "recei p1 for your records PTID 13333PP80435710 Goo MID xxm36314 0mg Date 1 Time " +
                 "18 53 11 V Authcode 960176 Total Ref 52 13 AID A0000000031010 Ap Seq 00 Tofu To " +
                 "en 00000000000019591446 CODE RAIE GROSS VAT 0 23 0 6 220 00 41 14 mum n A no 1 f";
@@ -116,6 +125,13 @@ public class FieldExtractorTest {
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from ocrSample1 ocr: " + price);
+        assertTrue(price.equals("eur220.00"));
+
+        System.out.println("====Performing fieldExtraction on ocrSample2 string====");
+        priceInformation = fieldExtractor.getPrice(ocrSample2.toLowerCase().split("\\s+"));
+        assertNotNull(priceInformation);
+        price = priceInformation.get("amount");
+        System.out.println("Price information from ocrSample2 ocr: " + price);
         assertTrue(price.equals("eur220.00"));
     }
 

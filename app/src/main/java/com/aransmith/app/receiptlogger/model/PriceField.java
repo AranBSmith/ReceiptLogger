@@ -10,8 +10,8 @@ public class PriceField {
     private StringComparison stringComparison;
 
     public PriceField(){
-        fieldNames = new String[] {"sale", "total amount", "amount due", "total", "total due",
-                                    "visadebit sale", "sale amount", "card sales", "goods value",
+        fieldNames = new String[] {"sale", "totalamount", "amountdue", "total", "totaldue",
+                                    "visadebitsale", "saleamount", "cardsales", "goodsvalue",
                                         "amount"};
     }
 
