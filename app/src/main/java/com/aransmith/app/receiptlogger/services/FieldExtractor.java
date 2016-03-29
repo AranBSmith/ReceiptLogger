@@ -3,7 +3,6 @@ package com.aransmith.app.receiptlogger.services;
 import com.aransmith.app.receiptlogger.model.PriceField;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -68,6 +67,7 @@ public class FieldExtractor {
                     System.out.println("Amount is of the right format.");
                     // get currency
                     currency = amount.substring(0,3);
+                    amount = amount.substring(3,amount.length());
 
                     System.out.println("Currency is found to be: " + currency);
 
@@ -99,6 +99,7 @@ public class FieldExtractor {
                     System.out.println("Amount is of the right format.");
                     // get currency
                     currency = amount.substring(0,3);
+                    amount = amount.substring(3,amount.length());
 
                     System.out.println("Currency is found to be: " + currency);
 
@@ -212,6 +213,7 @@ public class FieldExtractor {
                     System.out.println("2ndP: Amount is of the right format.");
                     // get currency
                     currency = amount.substring(0, 3);
+                    amount = amount.substring(3,amount.length());
 
                     System.out.println("2ndP: Currency is found to be: " + currency);
 
@@ -257,71 +259,6 @@ public class FieldExtractor {
             return result;
         }
         return result;
-    }
-
-
-    /**
-     * Method used by performFieldExtraction to find a relevent field,
-     * it assumes that the name of the field is perfect.
-     *
-     * Passes through ocrdText word by word searching for the relevent field.
-     * If a match is found return the next string value. Check it is not too
-     * long and not too short for the situation.
-     *
-     * @return The associated with the given field as a String.
-     */
-    private LinkedList<String> firstPass(String fieldName, String ocrdText){
-        String[] words = splitOcrdText(ocrdText);
-        boolean found = false;
-
-
-        /*boolean found = false;
-        LinkedList<String> values = new LinkedList<>();
-
-        int i = 0;
-        for(String word : words){
-            // System.out.println(word);
-            if(word.equals(fieldName)){
-                found = true;
-            }
-
-            // to include cent amount after space character.
-            else if(found && fieldName.equals("sale")){
-                word = word.concat(words[i+1]);
-                values.add(word);
-            }
-
-            else if(found){
-                values.add(word);
-                found = false;
-            }
-
-            i++;
-        }*/
-        return null;
-    }
-
-    private LinkedList<String> secondPass(String fieldName, String ocrdText){
-        String[] words = splitOcrdText(ocrdText);
-        stringComparison = new StringComparison();
-
-        boolean found = false;
-        LinkedList<String> values = new LinkedList<>();
-
-        for(String word : words){
-            int score = stringComparison.stringCompare(word,"AID");
-
-            if(found){
-                values.add(word);
-                found = false;
-            }
-
-            else if(score!=-1){
-                found = true;
-            }
-        }
-
-        return values;
     }
 
     private String[] splitOcrdText(String ocrdText){

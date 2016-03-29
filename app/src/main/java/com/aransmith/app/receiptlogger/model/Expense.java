@@ -12,4 +12,6 @@ public class Expense {
     private String email;
     private String category;
     private String date;
+    private float price;
+    private String currency;
 }

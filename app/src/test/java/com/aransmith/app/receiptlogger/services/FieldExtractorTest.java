@@ -101,7 +101,7 @@ public class FieldExtractorTest {
         assertNotNull(priceInformation);
         String price = priceInformation.get("amount");
         System.out.println("Price information from pretty good ocr: " + price);
-        assertTrue(price.equals("eur5.44"));
+        assertTrue(price.equals("5.44"));
 
         // this segment is concerned with testing on ocr text is imperfect
         System.out.println("====Performing fieldExtraction on imperfect string====");
@@ -117,7 +117,7 @@ public class FieldExtractorTest {
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from noperfectpricefield ocr: " + price);
-        assertTrue(price.equals("elr29.80"));
+        assertTrue(price.equals("29.80"));
 
         // this segment is concerned with testing on ocr text that has no perfect price field
         System.out.println("====Performing fieldExtraction on ocrSample1 string====");
@@ -125,14 +125,14 @@ public class FieldExtractorTest {
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from ocrSample1 ocr: " + price);
-        assertTrue(price.equals("eur220.00"));
+        assertTrue(price.equals("220.00"));
 
         System.out.println("====Performing fieldExtraction on ocrSample2 string====");
         priceInformation = fieldExtractor.getPrice(ocrSample2.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from ocrSample2 ocr: " + price);
-        assertTrue(price.equals("eur220.00"));
+        assertTrue(price.equals("220.00"));
     }
 
 

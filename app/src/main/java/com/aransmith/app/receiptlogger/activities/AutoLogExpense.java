@@ -144,8 +144,6 @@ public class AutoLogExpense extends Activity {
         PerformOCR performOCR = new PerformOCR(bitmap, lang, DATA_PATH);
         String expenseText = performOCR.performOCR();
 
-        // Log.v(TAG, "OCRED TEXT: " + expenseText);
-
         if ( lang.equalsIgnoreCase("eng") ) {
             expenseText = expenseText.replaceAll("[^a-zA-Z0-9]+", " ");
         }
@@ -164,7 +162,14 @@ public class AutoLogExpense extends Activity {
             System.out.println(expenseText);
             HashMap<String,String> priceInfo = fieldExtractor.getFields(expenseText);
 
+            EditText priceTextField = (EditText) findViewById(R.id.price);
+            priceTextField.setText(priceInfo.get("amount"));
+
+            EditText currencyTextField = (EditText) findViewById(R.id.currency);
+            currencyTextField.setText(priceInfo.get("currency"));
+
             System.out.println("price information is: " + priceInfo);
+
         }
     }
 }

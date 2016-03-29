@@ -73,9 +73,9 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="date"
+                android:inputType="text"
                 android:ems="10"
-                android:id="@+id/editText2"
+                android:id="@+id/currency"
                 android:gravity="right" />
         </TableRow>
 
@@ -95,9 +95,9 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="date"
+                android:inputType="numberDecimal"
                 android:ems="10"
-                android:id="@+id/editText3"
+                android:id="@+id/price"
                 android:gravity="right" />
         </TableRow>
 
