@@ -14,4 +14,5 @@ public class Expense {
     private String date;
     private float price;
     private String currency;
+    private String directory;
 }

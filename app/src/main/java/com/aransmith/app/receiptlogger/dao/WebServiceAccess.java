@@ -2,6 +2,8 @@ package com.aransmith.app.receiptlogger.dao;
 
 import android.util.Log;
 
+import com.aransmith.app.receiptlogger.model.Expense;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -52,5 +54,10 @@ public class WebServiceAccess {
             Log.e("MainActivity", e.getMessage(), e);
         }
         return false;
+    }
+
+    public boolean submitExpense(Expense expense){
+
+        return true;
     }
 }

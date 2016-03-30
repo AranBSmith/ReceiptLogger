@@ -14,8 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 public class FieldExtractorTest {
 
-    private static final String TEXTEXTRACTION = "TEXTEXTRACTION";
-
     FieldExtractor fieldExtractor;
 
     String imperfectOCRText, prettyGoodOCRText;
@@ -45,8 +43,8 @@ public class FieldExtractorTest {
         imperfectOCRText = "I II R E L A N D I WEETABIX EURS 9 T MILK 3LTR EURZJQ MANGO EU 00 " +
                 "ICING SUGAR EUR 09 MILK CHOC EUROVBQ MILK CHOC Un t 9 MILK CHOC EURO b5 MILK CH" +
                 " EURO 9 MILK CHI EUQO 59 PORK PIES EUR 50 DNVDELICKDM E094 00 CH1CKEN NR ERIN SE5" +
-                " 38 LF 071 39 RADIUM BA Em1 99 OTAL ELR29 80 VISAMBU SALE 29 80 AID WWI 331010 " +
-                "W IItIIIIllIll2691 ICC PAN SEO 0 oo AUTH out 33442 s um 11 13 EXPIRY 11 15 V " +
+                " 38 LF 071 39 RADIUM BA Em1 99 OTAL ELR29 80 VISAMBU SALE 29 80 DATE 01 03 AID WWI" +
+                " 331010 W IItIIIIllIll2691 ICC PAN SEO 0 oo AUTH out 33442 s um 11 13 EXPIRY 11 15 V " +
                 "Carmggr pIN Vormod EURO 00 W P on CLIBC l 31 You 099 E d 29 ARI";
 
         prettyGoodOCRText = "III I It E L l ru c All 7 T FRENCH CFFE EUR2 30 BEEF SLICES " +
@@ -151,5 +149,15 @@ public class FieldExtractorTest {
     @Test
     public void testCheckPriceFormat(){
         assertTrue(fieldExtractor.checkPriceFormat("EUR5.44"));
+    }
+
+    @Test
+    public void testGetDate(){
+        System.out.println("====Performing fieldExtraction on perfect string for a date.====");
+        String dateInformation =
+                fieldExtractor.getDate(imperfectOCRText.toLowerCase().split("\\s+"));
+        assertNotNull(dateInformation);
+        System.out.println("Date information from imperfectOCR is:  " + dateInformation);
+        assertTrue(dateInformation.equals("01/03"));
     }
 }

@@ -168,6 +168,9 @@ public class AutoLogExpense extends Activity {
             EditText currencyTextField = (EditText) findViewById(R.id.currency);
             currencyTextField.setText(priceInfo.get("currency"));
 
+            EditText dateTextField = (EditText) findViewById(R.id.date);
+            dateTextField.setText(priceInfo.get("date"));
+
             System.out.println("price information is: " + priceInfo);
 
         }
