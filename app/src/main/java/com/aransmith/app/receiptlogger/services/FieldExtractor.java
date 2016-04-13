@@ -452,7 +452,6 @@ public class FieldExtractor {
         String date = getDate(splitOcrdText);
 
         priceInfo.put("date", date);
-
         return priceInfo;
     }
 }

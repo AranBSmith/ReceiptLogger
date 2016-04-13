@@ -1,4 +1,4 @@
-package com.aransmith.app.receiptlogger.interfaces;
+package com.aransmith.app.receiptlogger.model;
 
 import com.aransmith.app.receiptlogger.services.StringComparison;
 

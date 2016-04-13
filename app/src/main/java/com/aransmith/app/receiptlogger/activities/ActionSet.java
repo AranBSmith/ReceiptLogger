@@ -13,9 +13,14 @@ import android.widget.Button;
 public class ActionSet extends Activity {
     private static final String TAG = "ActionSet";
     protected Button logExpenseButton, viewExpensesButton;
+    private Bundle bundle;
+    private String email;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        this.bundle = getIntent().getExtras();
+        email = bundle.getString("email");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actionset);
 
@@ -28,9 +33,11 @@ public class ActionSet extends Activity {
     public class logExpenseClickHandler implements View.OnClickListener {
         public void onClick(View view){
             Log.i(TAG, "logExpenseButton has been pressed. Moving to new activity");
-            Intent i = new Intent(getApplicationContext(),LogExpenseOptions.class);
+            Intent i = new Intent(getApplicationContext(), LogExpenseOptions.class);
+            i.putExtra("email", email);
+
             startActivity(i);
-            //setContentView(R.layout.main);
+            setContentView(R.layout.main);
         }
     }
 

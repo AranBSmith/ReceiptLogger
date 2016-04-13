@@ -2,21 +2,30 @@ package com.aransmith.app.receiptlogger.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.aransmith.app.receiptlogger.interfaces.AsyncBoolResponse;
+import com.aransmith.app.receiptlogger.model.Categories;
+import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
 import com.aransmith.app.receiptlogger.services.DirectoryCreate;
+import com.aransmith.app.receiptlogger.services.ExpenseService;
 import com.aransmith.app.receiptlogger.services.FieldExtractor;
 import com.aransmith.app.receiptlogger.services.PerformOCR;
 import com.aransmith.app.receiptlogger.services.PhotoOrient;
@@ -35,15 +44,18 @@ public class AutoLogExpense extends Activity {
     public static final String lang = "eng";
 
     private static final String TAG = "SimpleAndroidOCR.java";
-    protected static final String PHOTO_TAKEN = "photo_taken";
+    private static final String PHOTO_TAKEN = "photo_taken";
     private static final int REQUEST_WRITE_STORAGE = 112;
 
-    protected Button button;
-    protected EditText textField;
-    protected String path;
-    protected boolean photoTaken;
-
+    private Button button, submitExpenseButton;
+    private EditText textField, descriptionTextField;
+    private Spinner spinner;
+    private String path;
+    private boolean photoTaken;
+    private Bundle bundle;
     private FieldExtractor fieldExtractor;
+
+    HashMap<String, String> priceValues;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,21 +98,118 @@ public class AutoLogExpense extends Activity {
             }
         }
 
+        path = DATA_PATH + "/ocr.jpg";
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
 
         textField = (EditText) findViewById(R.id.field);
+        descriptionTextField = (EditText) findViewById(R.id.expensedescription);
         button = (Button) findViewById(R.id.takepicbutton);
-        button.setOnClickListener(new ButtonClickHandler());
+        button.setOnClickListener(new PhotoButtonClickHandler());
+        submitExpenseButton = (Button) findViewById(R.id.submitexpensebutton);
+        submitExpenseButton.setOnClickListener(new SubmitExpenseClickHandler());
 
-        path = DATA_PATH + "/ocr.jpg";
+        spinner = (Spinner)findViewById(R.id.spinner);
+
+        // get an array of strings which are valid categories
+        String[] items = new Categories().getCategories();
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        spinner.setAdapter(adapter);
     }
 
-    public class ButtonClickHandler implements View.OnClickListener {
+    public class PhotoButtonClickHandler implements View.OnClickListener {
         public void onClick(View view) {
             Log.v(TAG, "Starting Camera app");
             startCameraActivity();
+        }
+    }
+
+    // submit an expense object, if it nothing instantiated in the expense object notify the user
+    // to fill in the required fields.
+    public class SubmitExpenseClickHandler implements View.OnClickListener, AsyncBoolResponse {
+        public void onClick(View view) {
+            Log.v(TAG, "Submitting expense");
+            bundle = getIntent().getExtras();
+            String email = bundle.getString("email");
+
+            priceValues = new HashMap<>();
+
+            EditText priceTextField = (EditText) findViewById(R.id.price);
+            priceValues.put("amount", priceTextField.getText().toString());
+
+            EditText currencyTextField = (EditText) findViewById(R.id.currency);
+            priceValues.put("currency", currencyTextField.getText().toString());
+
+            EditText dateTextField = (EditText) findViewById(R.id.date);
+            priceValues.put("date", dateTextField.getText().toString());
+
+            EditText descriptionTextField = (EditText) findViewById(R.id.expensedescription);
+            priceValues.put("description", descriptionTextField.getText().toString());
+
+            Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
+                    priceValues.get("currency"), spinner.getSelectedItem().toString(),
+                    priceValues.get("date"),  priceValues.get("description"),
+                    "Random".getBytes(), false);
+
+            MyAsyncTask asyncTask = new MyAsyncTask();
+            asyncTask.delegate = this;
+            asyncTask.execute(expense);
+        }
+
+        // the process was finished and now we must notify the user
+        public void processFinish(Boolean result){
+            if(result != null){
+                if(result){
+                    Log.v(TAG, "Expense submission was successful");
+                    Intent i = new Intent(getApplicationContext(),ActionSet.class);
+                    i.putExtra("email", "aran.smith47@mail.dcu.ie");
+
+                    Context context = getApplicationContext();
+                    CharSequence text = "Expense submission was successful!";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+
+                    startActivity(i);
+                    setContentView(R.layout.actionset);
+
+                } else {
+                    Log.v(TAG, "Expense submission was unsuccessful");
+
+                    Context context = getApplicationContext();
+                    CharSequence text = "Expense submission was unsuccessful!";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
+            }
+        }
+    }
+
+    private class MyAsyncTask extends AsyncTask<Expense, Void, Boolean> {
+
+        public AsyncBoolResponse delegate = null;
+
+        @Override
+        protected Boolean doInBackground(Expense... params) {
+            Expense expense = params[0];
+            ExpenseService expenseService = new ExpenseService();
+
+            // expense submission is true
+            if(expenseService.submitExpense(expense))
+                return true;
+
+            else return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            delegate.processFinish(result);
         }
     }
 
@@ -173,6 +282,7 @@ public class AutoLogExpense extends Activity {
 
             System.out.println("price information is: " + priceInfo);
 
+            priceValues = priceInfo;
         }
     }
 }

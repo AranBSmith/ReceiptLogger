@@ -56,6 +56,8 @@ public class LoginScreen extends Activity {
                 if(result){
                     Log.i(TAG, "Login successful");
                     Intent i = new Intent(getApplicationContext(),ActionSet.class);
+                    i.putExtra("email", emailField.getText().toString());
+
                     startActivity(i);
                     setContentView(R.layout.actionset);
                 } else {

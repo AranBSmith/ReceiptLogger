@@ -20,7 +20,7 @@ public class LoginTest {
         login = new Login();
         userName = "admin@mail.com";
         dcuUserName = "aran.smith47@mail.dcu.ie";
-        password = "admin";
+        password = "apassword";
         invalidUserName = "admin";
     }
 

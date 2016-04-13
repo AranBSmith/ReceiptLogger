@@ -1,5 +1,6 @@
 package com.aransmith.app.receiptlogger.services;
 
+import com.aransmith.app.receiptlogger.dao.WebServiceAccess;
 import com.aransmith.app.receiptlogger.model.Expense;
 
 import java.util.List;
@@ -9,15 +10,18 @@ import java.util.List;
  */
 public class ExpenseService {
 
-    private Expense expense = new Expense();
+    private WebServiceAccess webServiceAccess;
+
+    public ExpenseService(){
+        webServiceAccess = new WebServiceAccess();
+    }
 
     public List<Expense> retrieveExpenses(){
         return null;
     }
 
     public boolean submitExpense(Expense expense){
-        this.expense = expense;
-        return true;
+        return webServiceAccess.submitExpense(expense);
     }
 
     public boolean cancelExpense(Expense expense){

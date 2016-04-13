@@ -8,11 +8,27 @@ import lombok.Data;
 
 @Data
 public class Expense {
-
     private String email;
+    private double price;
+    private String currency;
     private String category;
     private String date;
-    private float price;
-    private String currency;
-    private String directory;
+    private String description;
+    private byte[] expenseImageData;
+    private boolean approved;
+
+    public Expense(
+            String email, double price, String currency, String category,
+            String date, String description, byte[] expenseImageData,
+            boolean approved){
+
+        this.email = email;
+        this.price = price;
+        this.currency = currency;
+        this.category = category;
+        this.date = date;
+        this.description = description;
+        this.expenseImageData = expenseImageData;
+        this.approved = approved;
+    }
 }
