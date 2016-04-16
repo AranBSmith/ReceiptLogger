@@ -98,7 +98,7 @@ public class AutoLogExpense extends Activity {
             }
         }
 
-        path = DATA_PATH + "/ocr.jpg";
+        path = DATA_PATH + "/ocr.png";
 
         super.onCreate(savedInstanceState);
 
@@ -148,6 +148,8 @@ public class AutoLogExpense extends Activity {
 
             EditText descriptionTextField = (EditText) findViewById(R.id.expensedescription);
             priceValues.put("description", descriptionTextField.getText().toString());
+
+            // imageData must be present here; then insert into this expense object.
 
             Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
                     priceValues.get("currency"), spinner.getSelectedItem().toString(),

@@ -25,11 +25,6 @@ public class LoginTest {
     }
 
     @Test
-    public void checkAdminAdminTrue(){
-        assertTrue(login.checkCredentials(userName, password));
-    }
-
-    @Test
     public void checkEmptyFalse(){
         assertFalse("The result is " + login.checkCredentials("", ""),
                 login.checkCredentials("", ""));

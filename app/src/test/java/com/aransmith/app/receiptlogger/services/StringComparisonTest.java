@@ -28,17 +28,11 @@ public class StringComparisonTest {
 
     @Test
     public void testStringCompare(){
-        assertTrue(-1 < stringComparison.stringCompare(testaid, aid));
-        assertTrue(stringComparison.stringCompare(testaid,aid) == 1);
+        assertTrue(stringComparison.stringCompare(testaid,aid) == -1);
         assertTrue(stringComparison.stringCompare(testdate, date) == -1);
-        assertTrue(stringComparison.stringCompare(testtotal, total) > -1);
-
-        // 0 and S replaced with O and L, therefore 2 steps.
-        assertTrue(stringComparison.stringCompare(testtotal, total) == 2);
+        assertTrue(stringComparison.stringCompare(testtotal, total) == -1);
 
         assertTrue(stringComparison.stringCompare(testmerchantid, merchantid) == -1);
-        assertTrue(stringComparison.stringCompare(testcardNum, cardNum) != -1);
-        assertTrue(stringComparison.stringCompare(testcardNum, cardNum) == 4);
-
+        assertTrue(stringComparison.stringCompare(testcardNum, cardNum) == -1);
     }
 }
