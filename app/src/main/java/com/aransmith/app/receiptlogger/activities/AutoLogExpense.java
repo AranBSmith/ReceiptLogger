@@ -20,13 +20,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.aransmith.app.receiptlogger.interfaces.AsyncBoolResponse;
+import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseResponse;
 import com.aransmith.app.receiptlogger.model.Categories;
 import com.aransmith.app.receiptlogger.model.Expense;
+import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
 import com.aransmith.app.receiptlogger.services.DirectoryCreate;
 import com.aransmith.app.receiptlogger.services.ExpenseService;
 import com.aransmith.app.receiptlogger.services.FieldExtractor;
+import com.aransmith.app.receiptlogger.services.ImageService;
 import com.aransmith.app.receiptlogger.services.PerformOCR;
 import com.aransmith.app.receiptlogger.services.PhotoOrient;
 
@@ -43,7 +45,7 @@ public class AutoLogExpense extends Activity {
 
     public static final String lang = "eng";
 
-    private static final String TAG = "SimpleAndroidOCR.java";
+    private static final String TAG = "AutoLogExpense.java";
     private static final String PHOTO_TAKEN = "photo_taken";
     private static final int REQUEST_WRITE_STORAGE = 112;
 
@@ -129,7 +131,7 @@ public class AutoLogExpense extends Activity {
 
     // submit an expense object, if it nothing instantiated in the expense object notify the user
     // to fill in the required fields.
-    public class SubmitExpenseClickHandler implements View.OnClickListener, AsyncBoolResponse {
+    public class SubmitExpenseClickHandler implements View.OnClickListener, AsyncExpenseResponse {
         public void onClick(View view) {
             Log.v(TAG, "Submitting expense");
             bundle = getIntent().getExtras();
@@ -150,21 +152,24 @@ public class AutoLogExpense extends Activity {
             priceValues.put("description", descriptionTextField.getText().toString());
 
             // imageData must be present here; then insert into this expense object.
+            ImageService imageService = new ImageService();
+            byte[] bytes = imageService.getPNGDataFromJPEG(path);
 
             Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
                     priceValues.get("currency"), spinner.getSelectedItem().toString(),
                     priceValues.get("date"),  priceValues.get("description"),
-                    "Random".getBytes(), false);
+                    bytes, false);
 
+            System.out.println("Now submitting information.");
             MyAsyncTask asyncTask = new MyAsyncTask();
             asyncTask.delegate = this;
             asyncTask.execute(expense);
         }
 
         // the process was finished and now we must notify the user
-        public void processFinish(Boolean result){
+        public void processFinish(ExpenseSubmissionResponse result){
             if(result != null){
-                if(result){
+                if(result.isSuccess()){
                     Log.v(TAG, "Expense submission was successful");
                     Intent i = new Intent(getApplicationContext(),ActionSet.class);
                     i.putExtra("email", "aran.smith47@mail.dcu.ie");
@@ -180,7 +185,8 @@ public class AutoLogExpense extends Activity {
                     setContentView(R.layout.actionset);
 
                 } else {
-                    Log.v(TAG, "Expense submission was unsuccessful");
+                    Log.v(TAG, "Expense submission was unsuccessful!");
+                    Log.v(TAG, result.getResponse());
 
                     Context context = getApplicationContext();
                     CharSequence text = "Expense submission was unsuccessful!";
@@ -193,24 +199,21 @@ public class AutoLogExpense extends Activity {
         }
     }
 
-    private class MyAsyncTask extends AsyncTask<Expense, Void, Boolean> {
+    private class MyAsyncTask extends AsyncTask<Expense, Void, ExpenseSubmissionResponse> {
 
-        public AsyncBoolResponse delegate = null;
+        public AsyncExpenseResponse delegate = null;
 
         @Override
-        protected Boolean doInBackground(Expense... params) {
+        protected ExpenseSubmissionResponse doInBackground(Expense... params) {
             Expense expense = params[0];
+            ExpenseSubmissionResponse expenseSubmissionResponse = new ExpenseSubmissionResponse();
             ExpenseService expenseService = new ExpenseService();
 
-            // expense submission is true
-            if(expenseService.submitExpense(expense))
-                return true;
-
-            else return false;
+            return expenseService.submitExpense(expense);
         }
 
         @Override
-        protected void onPostExecute(Boolean result) {
+        protected void onPostExecute(ExpenseSubmissionResponse result) {
             delegate.processFinish(result);
         }
     }

@@ -1,11 +1,15 @@
 package com.aransmith.app.receiptlogger.dao;
 
+import android.util.Base64;
 import android.util.Log;
 
 import com.aransmith.app.receiptlogger.model.Expense;
+import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
+import com.aransmith.app.receiptlogger.services.CompressionUtils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -14,6 +18,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,8 @@ public class WebServiceAccess {
 
     private HttpClient httpClient;
     private HttpPost httpPost;
+    private ExpenseSubmissionResponse expenseSubmissionResponse;
+    JSONObject jsonObj;
 
     public String content, id;
     final String url = "http://ec2-52-18-58-195.eu-west-1.compute.amazonaws.com:8090" +
@@ -32,6 +39,7 @@ public class WebServiceAccess {
 
     public boolean login(String email, String password) {
         try {
+            System.setProperty("http.keepAlive", "false");
             String target = url + "login/";
 
             httpClient = new DefaultHttpClient();
@@ -45,7 +53,8 @@ public class WebServiceAccess {
             HttpResponse response = httpClient.execute(httpPost);
             String content = EntityUtils.toString(response.getEntity());
 
-            JSONObject jsonObj = new JSONObject(content);
+            jsonObj = null;
+            jsonObj = new JSONObject(content);
 
             if(jsonObj.get("response").equals("success")){
                 return true;
@@ -59,33 +68,61 @@ public class WebServiceAccess {
         return false;
     }
 
-    public boolean submitExpense(Expense expense){
+    public ExpenseSubmissionResponse submitExpense(Expense expense){
         try{
+            expenseSubmissionResponse = new ExpenseSubmissionResponse();
             String target = url + "submitExpense/";
+
             httpClient = new DefaultHttpClient();
             httpPost = new HttpPost(target);
 
             List<NameValuePair> nameValuePairs = preparedExpenseNameValuePair(expense);
 
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
             HttpResponse response = httpClient.execute(httpPost);
+
             String content = EntityUtils.toString(response.getEntity());
 
-            JSONObject jsonObj = new JSONObject(content);
+            jsonObj = null;
+            jsonObj = new JSONObject(content);
 
-            if(jsonObj.get("response").equals("success")){
-                return true;
+            if(jsonObj!=null) {
+                if ((Boolean) jsonObj.get("success")) {
+                    expenseSubmissionResponse.setSuccess();
+                    return expenseSubmissionResponse;
+                } else {
+                    expenseSubmissionResponse.setResponse(jsonObj.toString());
+                    expenseSubmissionResponse.appendMessage("Length before compression, base 64, submission is: " + expense.getExpenseImageData().length);
+                   // expenseSubmissionResponse.appendMessage("Length before submission is: " );
+                    return expenseSubmissionResponse;
+                }
             } else {
-                return false;
+                expenseSubmissionResponse.appendMessage("Json is null");
+                return expenseSubmissionResponse;
             }
-
-        } catch (Exception e) {
-            Log.e("WebServiceAccess", "tried submitting: " + expense.getCategory() + " " +
-                    expense.getEmail() + " " + expense.getCurrency() + " " + expense.getDate() + " "
-                    +expense.getDescription() + " " + expense.getExpenseImageData() + " "
-                    + e.getMessage(), e);
         }
-        return false;
+
+        catch(ClientProtocolException e){
+            expenseSubmissionResponse = new ExpenseSubmissionResponse();
+            expenseSubmissionResponse.appendMessage(e.getMessage());
+            return expenseSubmissionResponse;
+        }
+
+        catch (Exception e) {
+           /* try {
+                *//*Log.e("WebServiceAccess", "tried submitting: " + expense.getCategory() + " " +
+                        expense.getEmail() + " " + expense.getCurrency() + " " + expense.getDate() + " "
+                        +expense.getDescription() + " " + new String(expense.getExpenseImageData(), "ISO-8859-1") + " "
+                        + e.getMessage(), e);*//*
+                // Log.e("WebServiceAccess", content);
+            } catch (UnsupportedEncodingException e) {
+                e1.printStackTrace();
+            }*/
+            expenseSubmissionResponse = new ExpenseSubmissionResponse();
+            expenseSubmissionResponse.appendMessage(e.getMessage());
+            return expenseSubmissionResponse;
+        }
     }
 
     // convert Expense into a format that can be submitted via http post through the httpclient class
@@ -98,8 +135,13 @@ public class WebServiceAccess {
         nameValuePairs.add(new BasicNameValuePair("date", expense.getDate()));
         nameValuePairs.add(new BasicNameValuePair("description", expense.getDescription()));
         try {
-            nameValuePairs.add(new BasicNameValuePair("expenseimage", new String(expense.getExpenseImageData(), "UTF-8")));
+            // convert to base64 encoding
+            byte[] compressedImage = CompressionUtils.compress(expense.getExpenseImageData());
+            String imgString = Base64.encodeToString(compressedImage , Base64.NO_WRAP);
+            nameValuePairs.add(new BasicNameValuePair("expenseimage",imgString));
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         nameValuePairs.add(new BasicNameValuePair("approved", (String.valueOf(expense.isApproved()))));

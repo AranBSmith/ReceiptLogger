@@ -2,6 +2,7 @@ package com.aransmith.app.receiptlogger.services;
 
 import com.aransmith.app.receiptlogger.dao.WebServiceAccess;
 import com.aransmith.app.receiptlogger.model.Expense;
+import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class ExpenseService {
         return null;
     }
 
-    public boolean submitExpense(Expense expense){
+    public ExpenseSubmissionResponse submitExpense(Expense expense){
         return webServiceAccess.submitExpense(expense);
     }
 
