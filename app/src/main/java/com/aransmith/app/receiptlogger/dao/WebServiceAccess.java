@@ -4,8 +4,10 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.aransmith.app.receiptlogger.model.Expense;
+import com.aransmith.app.receiptlogger.model.ExpenseRetrievalResponse;
 import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 import com.aransmith.app.receiptlogger.services.CompressionUtils;
+import com.google.gson.Gson;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -39,7 +41,6 @@ public class WebServiceAccess {
 
     public boolean login(String email, String password) {
         try {
-            System.setProperty("http.keepAlive", "false");
             String target = url + "login/";
 
             httpClient = new DefaultHttpClient();
@@ -68,6 +69,34 @@ public class WebServiceAccess {
         return false;
     }
 
+    public ExpenseRetrievalResponse retrieveUserExpenses(String email, String password){
+        try {
+            String target = url + "userExpenseRetrieval/";
+
+            httpClient = new DefaultHttpClient();
+            httpPost = new HttpPost(target);
+
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            nameValuePairs.add(new BasicNameValuePair("email", email));
+            nameValuePairs.add(new BasicNameValuePair("password", password));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            HttpResponse response = httpClient.execute(httpPost);
+            String content = EntityUtils.toString(response.getEntity());
+
+            jsonObj = null;
+            jsonObj = new JSONObject(content);
+
+            ExpenseRetrievalResponse expenseRetrievalResponse = new Gson().fromJson(jsonObj.toString(), ExpenseRetrievalResponse.class);
+            expenseRetrievalResponse.appendMessage(jsonObj.toString());
+            return expenseRetrievalResponse;
+
+        } catch (Exception e) {
+            Log.e("WebServiceAccess", e.getMessage(), e);
+        }
+        return null;
+    }
+
     public ExpenseSubmissionResponse submitExpense(Expense expense){
         try{
             expenseSubmissionResponse = new ExpenseSubmissionResponse();
@@ -94,7 +123,6 @@ public class WebServiceAccess {
                 } else {
                     expenseSubmissionResponse.setResponse(jsonObj.toString());
                     expenseSubmissionResponse.appendMessage("Length before compression, base 64, submission is: " + expense.getExpenseImageData().length);
-                   // expenseSubmissionResponse.appendMessage("Length before submission is: " );
                     return expenseSubmissionResponse;
                 }
             } else {
@@ -110,15 +138,6 @@ public class WebServiceAccess {
         }
 
         catch (Exception e) {
-           /* try {
-                *//*Log.e("WebServiceAccess", "tried submitting: " + expense.getCategory() + " " +
-                        expense.getEmail() + " " + expense.getCurrency() + " " + expense.getDate() + " "
-                        +expense.getDescription() + " " + new String(expense.getExpenseImageData(), "ISO-8859-1") + " "
-                        + e.getMessage(), e);*//*
-                // Log.e("WebServiceAccess", content);
-            } catch (UnsupportedEncodingException e) {
-                e1.printStackTrace();
-            }*/
             expenseSubmissionResponse = new ExpenseSubmissionResponse();
             expenseSubmissionResponse.appendMessage(e.getMessage());
             return expenseSubmissionResponse;
@@ -148,18 +167,4 @@ public class WebServiceAccess {
 
         return nameValuePairs;
     }
-
-
-    /*public ArrayList<NameObjectPair> getObjectNameValuePairs(Object obj) throws IllegalArgumentException, IllegalAccessException {
-        ArrayList<NameObjectPair> list = new ArrayList<>();
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            NameObjectPair nameValuePair = new NameObjectPair();
-            nameValuePair.setName(field.getName());
-            nameValuePair.setValue(field.get(obj));
-            list.add(nameValuePair);
-        }
-        return list;
-    }*/
-
 }

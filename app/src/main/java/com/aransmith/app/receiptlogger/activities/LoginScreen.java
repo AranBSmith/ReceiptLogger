@@ -57,9 +57,10 @@ public class LoginScreen extends Activity {
                     Log.i(TAG, "Login successful");
                     Intent i = new Intent(getApplicationContext(),ActionSet.class);
                     i.putExtra("email", emailField.getText().toString());
+                    i.putExtra("password", passwordField.getText().toString());
 
                     startActivity(i);
-                    setContentView(R.layout.actionset);
+                    // setContentView(R.layout.actionset);
                 } else {
                     Log.i(TAG, "Login unsuccessful");
                 }

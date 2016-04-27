@@ -89,7 +89,9 @@ dependencies {
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.3.2'
     compile 'com.android.support:appcompat-v7:+'
-    compile files('libs/org.apache.http.legacy.jar')
+    compile 'com.google.code.gson:gson:1.7.2'
+    compile files('libs/org.apache.http.legacy.jar'
+    )
 
 }
 

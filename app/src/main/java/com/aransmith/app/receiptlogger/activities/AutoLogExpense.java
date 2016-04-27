@@ -57,10 +57,15 @@ public class AutoLogExpense extends Activity {
     private Bundle bundle;
     private FieldExtractor fieldExtractor;
 
+    private String email, password;
+
     HashMap<String, String> priceValues;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        this.bundle = getIntent().getExtras();
+        email = bundle.getString("email");
+        password = bundle.getString("password");
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
@@ -135,7 +140,6 @@ public class AutoLogExpense extends Activity {
         public void onClick(View view) {
             Log.v(TAG, "Submitting expense");
             bundle = getIntent().getExtras();
-            String email = bundle.getString("email");
 
             priceValues = new HashMap<>();
 
@@ -169,10 +173,12 @@ public class AutoLogExpense extends Activity {
         // the process was finished and now we must notify the user
         public void processFinish(ExpenseSubmissionResponse result){
             if(result != null){
-                if(result.isSuccess()){
+                if(result.isSuccess()) {
                     Log.v(TAG, "Expense submission was successful");
-                    Intent i = new Intent(getApplicationContext(),ActionSet.class);
-                    i.putExtra("email", "aran.smith47@mail.dcu.ie");
+                    Intent i = new Intent(getApplicationContext(), ActionSet.class);
+
+                    i.putExtra("email", email);
+                    i.putExtra("password", password);
 
                     Context context = getApplicationContext();
                     CharSequence text = "Expense submission was successful!";
@@ -182,7 +188,6 @@ public class AutoLogExpense extends Activity {
                     toast.show();
 
                     startActivity(i);
-                    setContentView(R.layout.actionset);
 
                 } else {
                     Log.v(TAG, "Expense submission was unsuccessful!");
