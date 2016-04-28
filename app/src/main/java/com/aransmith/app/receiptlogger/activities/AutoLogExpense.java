@@ -2,6 +2,7 @@ package com.aransmith.app.receiptlogger.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -56,6 +57,7 @@ public class AutoLogExpense extends Activity {
     private boolean photoTaken;
     private Bundle bundle;
     private FieldExtractor fieldExtractor;
+    private ProgressDialog mDialog;
 
     private String email, password;
 
@@ -113,8 +115,10 @@ public class AutoLogExpense extends Activity {
 
         textField = (EditText) findViewById(R.id.field);
         descriptionTextField = (EditText) findViewById(R.id.expensedescription);
+
         button = (Button) findViewById(R.id.takepicbutton);
         button.setOnClickListener(new PhotoButtonClickHandler());
+
         submitExpenseButton = (Button) findViewById(R.id.submitexpensebutton);
         submitExpenseButton.setOnClickListener(new SubmitExpenseClickHandler());
 
@@ -209,6 +213,15 @@ public class AutoLogExpense extends Activity {
         public AsyncExpenseResponse delegate = null;
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            mDialog = new ProgressDialog(AutoLogExpense.this);
+            mDialog.setMessage("Submitting your Expense...");
+            mDialog.show();
+        }
+
+        @Override
         protected ExpenseSubmissionResponse doInBackground(Expense... params) {
             Expense expense = params[0];
             ExpenseSubmissionResponse expenseSubmissionResponse = new ExpenseSubmissionResponse();
@@ -220,6 +233,7 @@ public class AutoLogExpense extends Activity {
         @Override
         protected void onPostExecute(ExpenseSubmissionResponse result) {
             delegate.processFinish(result);
+            mDialog.dismiss();
         }
     }
 
@@ -260,22 +274,22 @@ public class AutoLogExpense extends Activity {
         PhotoOrient photoOrient = new PhotoOrient(path);
         Bitmap bitmap = photoOrient.orientImage();
 
+        // the below will be performed as an async task.
         PerformOCR performOCR = new PerformOCR(bitmap, lang, DATA_PATH);
         String expenseText = performOCR.performOCR();
 
-        if ( lang.equalsIgnoreCase("eng") ) {
+        if (lang.equalsIgnoreCase("eng")) {
             expenseText = expenseText.replaceAll("[^a-zA-Z0-9]+", " ");
         }
 
         expenseText = expenseText.trim();
 
-        if ( expenseText.length() != 0 ) {
+        if (expenseText.length() != 0) {
             fieldExtractor = new FieldExtractor();
 
             textField.setText(textField.getText().toString().length() == 0 ? expenseText :
                     textField.getText() + " " + expenseText);
             textField.setSelection(textField.getText().toString().length());
-
 
             // set price field to price found
             System.out.println(expenseText);

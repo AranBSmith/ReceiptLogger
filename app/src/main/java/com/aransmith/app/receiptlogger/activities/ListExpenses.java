@@ -1,13 +1,15 @@
 package com.aransmith.app.receiptlogger.activities;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseRetrievalResponse;
 import com.aransmith.app.receiptlogger.model.Expense;
@@ -25,6 +27,9 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
     private Bundle bundle;
     private String email, password;
     ListView listView ;
+    LinkedList<Expense> expenses;
+    ProgressDialog mDialog;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,19 +61,15 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
 
         LinkedList<String> titles = new LinkedList<>();
 
-        for(Expense expense: output.getExpenses()){
+        expenses = output.getExpenses();
+
+        for(Expense expense: expenses){
             titles.add(expense.getDescription());
         }
 
         String[] values = titles.toArray(new String[titles.size()]);
 
         System.out.println(values.toString());
-
-        // Define a new Adapter
-        // First parameter - Context
-        // Second parameter - Layout for the row
-        // Third parameter - ID of the TextView to which the data is written
-        // Forth - the Array of data
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, android.R.id.text1, values);
@@ -81,21 +82,41 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // ListView Clicked item index
-                int itemPosition = position;
-                // ListView Clicked item value
-                String itemValue = (String) listView.getItemAtPosition(position);
-                // Show Alert
-                Toast.makeText(getApplicationContext(),
-                        "Position :"+itemPosition+"  ListItem : " +itemValue , Toast.LENGTH_LONG)
-                        .show();
+                // access position in linkedlist and display in DisplayExpense Activity
+                Expense expense = expenses.get(position);
+                startDisplayExpenseActivity(expense);
             }
         });
+    }
+
+    private void startDisplayExpenseActivity(Expense expense){
+        Log.i(TAG, "Expense has been clicked, switching activities to view expense");
+        Intent i = new Intent(getApplicationContext(), DisplayExpense.class);
+        i.putExtra("email", email);
+        i.putExtra("password", password);
+        i.putExtra("description", expense.getDescription());
+        i.putExtra("date", expense.getDate());
+        i.putExtra("category", expense.getCategory());
+        i.putExtra("currency", expense.getCurrency());
+        i.putExtra("price", expense.getPrice());
+        // i.putExtra("approval", expense.getApproval());
+
+        startActivity(i);
     }
 
     private class MyAsyncTask extends AsyncTask<HashMap<String,String>, Void, ExpenseRetrievalResponse> {
 
         public AsyncExpenseRetrievalResponse delegate = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            mDialog = new ProgressDialog(ListExpenses.this);
+            mDialog.setMessage("Getting your Expenses...");
+            mDialog.show();
+        }
+
 
         @Override
         protected ExpenseRetrievalResponse doInBackground(HashMap<String,String>... params) {
@@ -117,6 +138,7 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
         @Override
         protected void onPostExecute(ExpenseRetrievalResponse result) {
             delegate.processFinish(result);
+            mDialog.dismiss();
         }
     }
 }

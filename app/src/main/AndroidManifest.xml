@@ -22,6 +22,7 @@
         <activity android:name=".AutoLogExpense"></activity>
         <activity android:name=".LogExpenseOptions"></activity>
         <activity android:name=".ListExpenses"></activity>
+        <activity android:name=".DisplayExpense"></activity>
 
 
     </application>

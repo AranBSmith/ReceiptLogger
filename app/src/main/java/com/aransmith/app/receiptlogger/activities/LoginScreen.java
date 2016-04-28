@@ -1,6 +1,7 @@
 package com.aransmith.app.receiptlogger.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ public class LoginScreen extends Activity {
     protected Button loginButton;
     protected EditText domainField, emailField, passwordField;
     protected Login loginService;
+    ProgressDialog mDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -55,12 +57,12 @@ public class LoginScreen extends Activity {
              if(result != null){
                 if(result){
                     Log.i(TAG, "Login successful");
-                    Intent i = new Intent(getApplicationContext(),ActionSet.class);
+                    Intent i = new Intent(getApplicationContext(), ActionSet.class);
                     i.putExtra("email", emailField.getText().toString());
                     i.putExtra("password", passwordField.getText().toString());
 
                     startActivity(i);
-                    // setContentView(R.layout.actionset);
+
                 } else {
                     Log.i(TAG, "Login unsuccessful");
                 }
@@ -70,6 +72,15 @@ public class LoginScreen extends Activity {
         private class MyAsyncTask extends AsyncTask<HashMap<String,String>, Void, Boolean> {
 
             public AsyncBoolResponse delegate = null;
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+                mDialog = new ProgressDialog(LoginScreen.this);
+                mDialog.setMessage("Logging you in...");
+                mDialog.show();
+            }
 
             @Override
             protected Boolean doInBackground(HashMap<String,String>... params) {
@@ -84,6 +95,7 @@ public class LoginScreen extends Activity {
             @Override
             protected void onPostExecute(Boolean result) {
                 delegate.processFinish(result);
+                mDialog.dismiss();
             }
         }
     }
