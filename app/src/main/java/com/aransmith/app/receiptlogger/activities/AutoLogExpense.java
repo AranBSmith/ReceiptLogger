@@ -153,6 +153,9 @@ public class AutoLogExpense extends Activity {
             EditText currencyTextField = (EditText) findViewById(R.id.currency);
             priceValues.put("currency", currencyTextField.getText().toString());
 
+            EditText cardTextField = (EditText) findViewById(R.id.card);
+            priceValues.put("card", cardTextField.getText().toString());
+
             EditText dateTextField = (EditText) findViewById(R.id.date);
             priceValues.put("date", dateTextField.getText().toString());
 
@@ -164,9 +167,9 @@ public class AutoLogExpense extends Activity {
             byte[] bytes = imageService.getPNGDataFromJPEG(path);
 
             Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
-                    priceValues.get("currency"), spinner.getSelectedItem().toString(),
+                    priceValues.get("currency"), priceValues.get("card"), spinner.getSelectedItem().toString(),
                     priceValues.get("date"),  priceValues.get("description"),
-                    bytes, false);
+                    bytes);
 
             System.out.println("Now submitting information.");
             MyAsyncTask asyncTask = new MyAsyncTask();

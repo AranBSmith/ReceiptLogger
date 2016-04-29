@@ -99,7 +99,8 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
         i.putExtra("category", expense.getCategory());
         i.putExtra("currency", expense.getCurrency());
         i.putExtra("price", expense.getPrice());
-        // i.putExtra("approval", expense.getApproval());
+        i.putExtra("card", expense.getCard());
+        i.putExtra("approval", expense.isApproved());
 
         startActivity(i);
     }

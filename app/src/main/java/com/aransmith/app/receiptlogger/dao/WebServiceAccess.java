@@ -30,6 +30,7 @@ import java.util.List;
  */
 public class WebServiceAccess {
 
+    private static final String TAG = "WebServiceAccess";
     private HttpClient httpClient;
     private HttpPost httpPost;
     private ExpenseSubmissionResponse expenseSubmissionResponse;
@@ -150,9 +151,11 @@ public class WebServiceAccess {
         nameValuePairs.add(new BasicNameValuePair("email", expense.getEmail()));
         nameValuePairs.add(new BasicNameValuePair("price", String.valueOf(expense.getPrice())));
         nameValuePairs.add(new BasicNameValuePair("currency", expense.getCurrency()));
+        nameValuePairs.add(new BasicNameValuePair("card", expense.getCard()));
         nameValuePairs.add(new BasicNameValuePair("category", expense.getCategory()));
         nameValuePairs.add(new BasicNameValuePair("date", expense.getDate()));
         nameValuePairs.add(new BasicNameValuePair("description", expense.getDescription()));
+        Log.i(TAG, "description on submission is: " + expense.getDescription());
         try {
             // convert to base64 encoding
             byte[] compressedImage = CompressionUtils.compress(expense.getExpenseImageData());
