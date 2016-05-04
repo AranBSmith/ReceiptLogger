@@ -10,11 +10,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseRetrievalResponse;
 import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.model.ExpenseRetrievalResponse;
 import com.aransmith.app.receiptlogger.services.ExpenseService;
+import com.aransmith.app.receiptlogger.services.PriceService;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,7 +30,7 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
     private String email, password;
     ListView listView ;
     LinkedList<Expense> expenses;
-    ProgressDialog mDialog;
+    private ProgressDialog mDialog;
 
 
     @Override
@@ -87,6 +89,15 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
                 startDisplayExpenseActivity(expense);
             }
         });
+
+        // display monthly total and approved total
+        TextView monthTotal = (TextView) findViewById(R.id.totalmonth);
+        TextView monthApprovedTotal = (TextView) findViewById(R.id.approvedmonth);
+
+        // display the approved amounts and the total amount for the last 30 days
+        PriceService priceService = new PriceService();
+        monthTotal.setText("Monthly Total: " + priceService.calculateMonthlyTotal(output));
+        monthApprovedTotal.setText("Approved: " + priceService.calculateApprovedMonthlyTotal(output));
     }
 
     private void startDisplayExpenseActivity(Expense expense){
@@ -94,6 +105,7 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
         Intent i = new Intent(getApplicationContext(), DisplayExpense.class);
         i.putExtra("email", email);
         i.putExtra("password", password);
+        i.putExtra("id", expense.getId());
         i.putExtra("description", expense.getDescription());
         i.putExtra("date", expense.getDate());
         i.putExtra("category", expense.getCategory());
@@ -117,7 +129,6 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
             mDialog.setMessage("Getting your Expenses...");
             mDialog.show();
         }
-
 
         @Override
         protected ExpenseRetrievalResponse doInBackground(HashMap<String,String>... params) {

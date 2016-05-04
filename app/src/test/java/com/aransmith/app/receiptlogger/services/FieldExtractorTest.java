@@ -1,5 +1,7 @@
 package com.aransmith.app.receiptlogger.services;
 
+import com.aransmith.app.receiptlogger.model.PriceField;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +26,8 @@ public class FieldExtractorTest {
     String card, prettyGoodCard, imperfectCard;
     String[] prettyGoodOcrdArray;
 
+    PriceField priceField;
+
     @Before
     public void setup(){
         AID = "aid";
@@ -32,6 +36,8 @@ public class FieldExtractorTest {
         card = "number";
 
         fieldExtractor = new FieldExtractor();
+
+        priceField = new PriceField();
 
         noPerfectPriceField = "I II R E L A N D I WEETABIX EURS 9 T MILK 3LTR EURZJQ MANGO EU 00 " +
                 "ICING SUGAR EUR 09 MILK CHOC EUROVBQ MILK CHOC Un t 9 MILK CHOC EURO b5 MILK CH" +
@@ -77,16 +83,6 @@ public class FieldExtractorTest {
 
         prettyGoodOcrdArray = prettyGoodOCRText.split("\\s+");
     }
-
-   /*@Test
-    public void testPerformFieldExtraction(){
-        HashMap<String, String> fields = fieldExtractor.performFieldExtraction(prettyGoodOCRText);
-        // Log.v(TEXTEXTRACTION, fields.get(AID)); this causes a bug..
-        assertNotNull(fields.get(AID));
-        assertTrue(fields.get(AID).equals(prettyGoodAID));
-        assertTrue(fields.get(total).equals(prettyGoodAID));
-        assertTrue(fields.get(card).equals(prettyGoodAID));
-    }*/
 
     @Test
     public void testGetPrice(){
@@ -148,7 +144,7 @@ public class FieldExtractorTest {
 
     @Test
     public void testCheckPriceFormat(){
-        assertTrue(fieldExtractor.checkPriceFormat("EUR5.44"));
+        assertTrue(priceField.checkFormat("EUR5.44"));
     }
 
     @Test
@@ -159,5 +155,20 @@ public class FieldExtractorTest {
         assertNotNull(dateInformation);
         System.out.println("Date information from imperfectOCR is:  " + dateInformation);
         assertTrue(dateInformation.equals("01/03"));
+    }
+
+    @Test
+    public void testGetCurrency(){
+        String currency = fieldExtractor.getCurrency(prettyGoodOCRText.toLowerCase().split("\\s+"));
+        System.out.println("Currency was found to be: " + currency);
+        assertTrue(currency.equals("eur"));
+
+        currency = fieldExtractor.getCurrency(imperfectOCRText.toLowerCase().split("\\s+"));
+        System.out.println("Currency was found to be: " + currency);
+        assertTrue(currency.equals("eur"));
+
+        currency = fieldExtractor.getCurrency(ocrSample2.toLowerCase().split("\\s+"));
+        System.out.println("Currency was found to be: " + currency);
+        assertTrue(currency.equals("eur"));
     }
 }

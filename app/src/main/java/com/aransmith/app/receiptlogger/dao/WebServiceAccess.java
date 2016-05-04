@@ -3,6 +3,7 @@ package com.aransmith.app.receiptlogger.dao;
 import android.util.Base64;
 import android.util.Log;
 
+import com.aransmith.app.receiptlogger.model.CancelExpenseResponse;
 import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.model.ExpenseRetrievalResponse;
 import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
@@ -169,5 +170,37 @@ public class WebServiceAccess {
         nameValuePairs.add(new BasicNameValuePair("approved", (String.valueOf(expense.isApproved()))));
 
         return nameValuePairs;
+    }
+
+    public CancelExpenseResponse cancelExpense(String email, String password, int id) {
+        try {
+            String target = url + "cancelExpense/";
+
+            httpClient = new DefaultHttpClient();
+            httpPost = new HttpPost(target);
+
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+            nameValuePairs.add(new BasicNameValuePair("email", email));
+            nameValuePairs.add(new BasicNameValuePair("password", password));
+            nameValuePairs.add(new BasicNameValuePair("id",String.valueOf(id)));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            HttpResponse response = httpClient.execute(httpPost);
+            String content = EntityUtils.toString(response.getEntity());
+
+            jsonObj = null;
+            jsonObj = new JSONObject(content);
+
+            CancelExpenseResponse cancelExpenseResponse = new Gson()
+                    .fromJson(jsonObj.toString(), CancelExpenseResponse.class);
+
+            cancelExpenseResponse.appendMessage(jsonObj.toString());
+            return cancelExpenseResponse;
+
+        } catch (Exception e) {
+            Log.e("WebServiceAccess", e.getMessage(), e);
+        }
+
+        return null;
     }
 }

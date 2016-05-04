@@ -9,6 +9,18 @@ public abstract class FieldName {
     public String[] fieldNames;
     private StringComparison stringComparison;
 
+    public abstract String getFormat();
+
+    public abstract boolean checkFormat(String value);
+
+    public String cleanup(String value){
+        return value;
+    }
+
+    public String getSeperators(){
+        return "";
+    }
+
     public boolean equals(String word){
         for(String field: fieldNames){
             if(field.equals(word)){

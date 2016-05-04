@@ -1,8 +1,11 @@
 package com.aransmith.app.receiptlogger.model;
 
-public class PriceField extends FieldName {
+/**
+ * Created by Aran on 3/20/2016.
+ */
+public class CurrencyField extends FieldName{
 
-    public PriceField(){
+    public CurrencyField(){
         super.fieldNames = new String[] {"sale", "totalamount", "amountdue", "total", "totaldue",
                 "visadebitsale", "saleamount", "cardsales", "goodsvalue","amount"};
     }
@@ -18,7 +21,7 @@ public class PriceField extends FieldName {
 
     @Override
     public String cleanup(String priceWithCurrency){
-        String value = priceWithCurrency.substring(3,priceWithCurrency.length());
+        String value = priceWithCurrency.substring(0,3);
         return value;
     }
 

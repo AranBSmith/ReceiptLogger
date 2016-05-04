@@ -10,11 +10,34 @@
         android:layout_height="match_parent"
         android:paddingTop="56dp"
         android:paddingLeft="24dp"
-        android:paddingRight="24dp">
+        android:paddingRight="24dp"
+        android:weightSum="1">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/totalmonth"
+                android:layout_weight="0.47"
+                android:gravity="left" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/approvedmonth"
+                android:layout_weight="0.52"
+                android:gravity="right" />
+        </TableRow>
 
         <ListView
             android:id="@android:id/list"
-            android:layout_height="match_parent"
+            android:layout_height="504dp"
             android:layout_width="match_parent">
         </ListView>
 
