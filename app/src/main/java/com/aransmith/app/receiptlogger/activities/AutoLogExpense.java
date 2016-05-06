@@ -1,7 +1,6 @@
 package com.aransmith.app.receiptlogger.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +22,7 @@ import android.widget.Toast;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseResponse;
 import com.aransmith.app.receiptlogger.model.Categories;
+import com.aransmith.app.receiptlogger.model.Currencies;
 import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
@@ -32,6 +32,7 @@ import com.aransmith.app.receiptlogger.services.FieldExtractor;
 import com.aransmith.app.receiptlogger.services.ImageService;
 import com.aransmith.app.receiptlogger.services.PerformOCR;
 import com.aransmith.app.receiptlogger.services.PhotoOrient;
+import com.aransmith.app.receiptlogger.services.UserInputChecker;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,7 +41,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-public class AutoLogExpense extends Activity {
+public class AutoLogExpense extends FeedbackNotificationActivity {
     public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
             "/AutoLogExpense/";
 
@@ -50,18 +51,19 @@ public class AutoLogExpense extends Activity {
     private static final String PHOTO_TAKEN = "photo_taken";
     private static final int REQUEST_WRITE_STORAGE = 112;
 
-    private Button button, submitExpenseButton;
+    private Button button, submitExpenseButton, cancelButton;
     private EditText textField, descriptionTextField;
-    private Spinner spinner;
+    private Spinner categorySpinner, currencySpinner;
     private String path;
     private boolean photoTaken;
     private Bundle bundle;
     private FieldExtractor fieldExtractor;
     private ProgressDialog mDialog;
+    private Currencies currencies;
 
     private String email, password;
 
-    HashMap<String, String> priceValues;
+    private HashMap<String, String> priceValues;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,19 +124,56 @@ public class AutoLogExpense extends Activity {
         submitExpenseButton = (Button) findViewById(R.id.submitexpensebutton);
         submitExpenseButton.setOnClickListener(new SubmitExpenseClickHandler());
 
-        spinner = (Spinner)findViewById(R.id.spinner);
+        cancelButton = (Button) findViewById(R.id.cancel);
+        cancelButton.setOnClickListener(new CancelClickHandler());
+
+        categorySpinner = (Spinner) findViewById(R.id.spinner);
+        currencySpinner = (Spinner) findViewById(R.id.currency);
 
         // get an array of strings which are valid categories
-        String[] items = new Categories().getCategories();
+        String[] categories = new Categories().getCategories();
+
+        currencies = new Currencies();
+        String[] currencyList = currencies.getCurrencies();
+
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        spinner.setAdapter(adapter);
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categories);
+
+        categorySpinner.setAdapter(adapter);
+
+        adapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, currencyList);
+
+        currencySpinner.setAdapter(adapter);
     }
 
     public class PhotoButtonClickHandler implements View.OnClickListener {
         public void onClick(View view) {
             Log.v(TAG, "Starting Camera app");
             startCameraActivity();
+        }
+    }
+
+    private boolean noNullValues(HashMap<String, String> values){
+        // iterate through keys
+        for(String key: values.keySet()){
+            String value = values.get(key);
+            if(UserInputChecker.noValue(value)){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public class CancelClickHandler implements View.OnClickListener {
+        public void onClick(View view){
+            Intent i = new Intent(getApplicationContext(), ActionSet.class);
+
+            i.putExtra("email", email);
+            i.putExtra("password", password);
+
+            startActivity(i);
         }
     }
 
@@ -150,9 +189,6 @@ public class AutoLogExpense extends Activity {
             EditText priceTextField = (EditText) findViewById(R.id.price);
             priceValues.put("amount", priceTextField.getText().toString());
 
-            EditText currencyTextField = (EditText) findViewById(R.id.currency);
-            priceValues.put("currency", currencyTextField.getText().toString());
-
             EditText cardTextField = (EditText) findViewById(R.id.card);
             priceValues.put("card", cardTextField.getText().toString());
 
@@ -162,19 +198,24 @@ public class AutoLogExpense extends Activity {
             EditText descriptionTextField = (EditText) findViewById(R.id.expensedescription);
             priceValues.put("description", descriptionTextField.getText().toString());
 
-            // imageData must be present here; then insert into this expense object.
-            ImageService imageService = new ImageService();
-            byte[] bytes = imageService.getPNGDataFromJPEG(path);
+            if(noNullValues(priceValues)){
+                // imageData must be present here; then insert into this expense object.
+                ImageService imageService = new ImageService();
+                byte[] bytes = imageService.getPNGDataFromJPEG(path);
 
-            Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
-                    priceValues.get("currency"), priceValues.get("card"), spinner.getSelectedItem().toString(),
-                    priceValues.get("date"),  priceValues.get("description"),
-                    bytes);
+                Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
+                        currencySpinner.getSelectedItem().toString(), priceValues.get("card"),
+                        categorySpinner.getSelectedItem().toString(), priceValues.get("date"),
+                        priceValues.get("description"), bytes);
 
-            System.out.println("Now submitting information.");
-            MyAsyncTask asyncTask = new MyAsyncTask();
-            asyncTask.delegate = this;
-            asyncTask.execute(expense);
+                System.out.println("Now submitting information.");
+                MyAsyncTask asyncTask = new MyAsyncTask();
+                asyncTask.delegate = this;
+                asyncTask.execute(expense);
+
+            } else {
+                notifyUser("Please fill all fields");
+            }
         }
 
         // the process was finished and now we must notify the user
@@ -227,7 +268,6 @@ public class AutoLogExpense extends Activity {
         @Override
         protected ExpenseSubmissionResponse doInBackground(Expense... params) {
             Expense expense = params[0];
-            ExpenseSubmissionResponse expenseSubmissionResponse = new ExpenseSubmissionResponse();
             ExpenseService expenseService = new ExpenseService();
 
             return expenseService.submitExpense(expense);
@@ -292,6 +332,7 @@ public class AutoLogExpense extends Activity {
 
             textField.setText(textField.getText().toString().length() == 0 ? expenseText :
                     textField.getText() + " " + expenseText);
+
             textField.setSelection(textField.getText().toString().length());
 
             // set price field to price found
@@ -301,8 +342,8 @@ public class AutoLogExpense extends Activity {
             EditText priceTextField = (EditText) findViewById(R.id.price);
             priceTextField.setText(priceInfo.get("amount"));
 
-            EditText currencyTextField = (EditText) findViewById(R.id.currency);
-            currencyTextField.setText(priceInfo.get("currency"));
+            String currencyFound = priceInfo.get("currency").toUpperCase();
+            currencySpinner.setSelection(new Currencies().getPosition(currencyFound));
 
             EditText dateTextField = (EditText) findViewById(R.id.date);
             dateTextField.setText(priceInfo.get("date"));

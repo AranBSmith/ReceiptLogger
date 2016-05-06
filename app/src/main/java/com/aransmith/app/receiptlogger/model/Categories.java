@@ -11,8 +11,7 @@ public class Categories {
     String[] categories;
 
     public Categories(){
-        categories =
-                new String[]{"Breakfast", "Lunch", "Dinner", "Travel", "Hotel", "Car Rental",
+        categories = new String[]{"Breakfast", "Lunch", "Dinner", "Travel", "Hotel", "Car Rental",
                         "Entertainment", "Taxi", "Miscellaneous"};
     }
 }

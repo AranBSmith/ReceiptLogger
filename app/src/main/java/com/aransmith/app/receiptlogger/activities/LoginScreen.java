@@ -1,6 +1,5 @@
 package com.aransmith.app.receiptlogger.activities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -12,13 +11,14 @@ import android.widget.EditText;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncBoolResponse;
 import com.aransmith.app.receiptlogger.services.Login;
+import com.aransmith.app.receiptlogger.services.UserInputChecker;
 
 import java.util.HashMap;
 
 /**
  * Created by Aran on 26/01/2016.
  */
-public class LoginScreen extends Activity {
+public class LoginScreen extends FeedbackNotificationActivity {
 
     private static final String TAG = "LoginScreen";
     protected Button loginButton;
@@ -30,7 +30,6 @@ public class LoginScreen extends Activity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
-
 
         domainField = (EditText) findViewById(R.id.input_domain);
         emailField = (EditText) findViewById(R.id.input_email);
@@ -44,12 +43,18 @@ public class LoginScreen extends Activity {
         public void onClick(View view){
             String email = emailField.getText().toString();
             String password = passwordField.getText().toString();
-            HashMap<String, String> credentials = new HashMap<>();
-            credentials.put("email", email); credentials.put("password", password);
 
-            MyAsyncTask asyncTask = new MyAsyncTask();
-            asyncTask.delegate = this;
-            asyncTask.execute(credentials);
+            if(UserInputChecker.noValue(email) || UserInputChecker.noValue(password)){
+                notifyUser("Enter username and password");
+            } else {
+                HashMap<String, String> credentials = new HashMap<>();
+                credentials.put("email", email);
+                credentials.put("password", password);
+
+                MyAsyncTask asyncTask = new MyAsyncTask();
+                asyncTask.delegate = this;
+                asyncTask.execute(credentials);
+            }
         }
 
         // run this method when the async task is complete.
@@ -62,9 +67,9 @@ public class LoginScreen extends Activity {
                     i.putExtra("password", passwordField.getText().toString());
 
                     startActivity(i);
-
                 } else {
                     Log.i(TAG, "Login unsuccessful");
+                    notifyUser("Username or Password invalid");
                 }
              }
         }
