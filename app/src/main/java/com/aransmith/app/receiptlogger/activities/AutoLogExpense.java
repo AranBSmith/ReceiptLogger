@@ -26,12 +26,14 @@ import com.aransmith.app.receiptlogger.model.Currencies;
 import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
+import com.aransmith.app.receiptlogger.services.DateService;
 import com.aransmith.app.receiptlogger.services.DirectoryCreate;
 import com.aransmith.app.receiptlogger.services.ExpenseService;
 import com.aransmith.app.receiptlogger.services.FieldExtractor;
 import com.aransmith.app.receiptlogger.services.ImageService;
 import com.aransmith.app.receiptlogger.services.PerformOCR;
 import com.aransmith.app.receiptlogger.services.PhotoOrient;
+import com.aransmith.app.receiptlogger.services.PriceService;
 import com.aransmith.app.receiptlogger.services.UserInputChecker;
 
 import java.io.File;
@@ -118,9 +120,6 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
         textField = (EditText) findViewById(R.id.field);
         descriptionTextField = (EditText) findViewById(R.id.expensedescription);
 
-        button = (Button) findViewById(R.id.takepicbutton);
-        button.setOnClickListener(new PhotoButtonClickHandler());
-
         submitExpenseButton = (Button) findViewById(R.id.submitexpensebutton);
         submitExpenseButton.setOnClickListener(new SubmitExpenseClickHandler());
 
@@ -145,13 +144,8 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
                 new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, currencyList);
 
         currencySpinner.setAdapter(adapter);
-    }
 
-    public class PhotoButtonClickHandler implements View.OnClickListener {
-        public void onClick(View view) {
-            Log.v(TAG, "Starting Camera app");
-            startCameraActivity();
-        }
+        performOCR();
     }
 
     private boolean noNullValues(HashMap<String, String> values){
@@ -198,20 +192,36 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
             EditText descriptionTextField = (EditText) findViewById(R.id.expensedescription);
             priceValues.put("description", descriptionTextField.getText().toString());
 
+            // there are no empty values
             if(noNullValues(priceValues)){
-                // imageData must be present here; then insert into this expense object.
-                ImageService imageService = new ImageService();
-                byte[] bytes = imageService.getPNGDataFromJPEG(path);
 
-                Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
-                        currencySpinner.getSelectedItem().toString(), priceValues.get("card"),
-                        categorySpinner.getSelectedItem().toString(), priceValues.get("date"),
-                        priceValues.get("description"), bytes);
+                // check if text fields go by their proper formats
 
-                System.out.println("Now submitting information.");
-                MyAsyncTask asyncTask = new MyAsyncTask();
-                asyncTask.delegate = this;
-                asyncTask.execute(expense);
+                boolean validDate = new DateService().checkInputDate(priceValues.get("date"));
+                boolean validPrice = new PriceService().checkFormat(priceValues.get("amount"));
+
+                if(validDate && validPrice){
+                    // imageData must be present here; then insert into this expense object.
+                    ImageService imageService = new ImageService();
+                    byte[] bytes = imageService.getPNGDataFromJPEG(path);
+
+                    Expense expense = new Expense(email, Double.parseDouble(priceValues.get("amount")),
+                            currencySpinner.getSelectedItem().toString(), priceValues.get("card"),
+                            categorySpinner.getSelectedItem().toString(), priceValues.get("date"),
+                            priceValues.get("description"), bytes);
+
+                    System.out.println("Now submitting information.");
+                    MyAsyncTask asyncTask = new MyAsyncTask();
+                    asyncTask.delegate = this;
+                    asyncTask.execute(expense);
+
+                } else if (!validPrice && !validDate){
+                    notifyUser("Price and Date invalid");
+                } else if(!validPrice){
+                    notifyUser("Price invalid");
+                } else if(!validDate){
+                    notifyUser("Date invalid");
+                }
 
             } else {
                 notifyUser("Please fill all fields");
@@ -293,7 +303,7 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
         Log.i(TAG, "resultCode: " + resultCode);
 
         if (resultCode == -1) {
-            onPhotoTaken();
+            performOCR();
         } else {
             Log.v(TAG, "User cancelled");
         }
@@ -308,12 +318,13 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.i(TAG, "onRestoreInstanceState()");
         if (savedInstanceState.getBoolean(AutoLogExpense.PHOTO_TAKEN)) {
-            onPhotoTaken();
+            performOCR();
         }
     }
 
-    protected void onPhotoTaken() {
+    protected void performOCR() {
         photoTaken = true;
+       
         PhotoOrient photoOrient = new PhotoOrient(path);
         Bitmap bitmap = photoOrient.orientImage();
 
@@ -337,13 +348,19 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
 
             // set price field to price found
             System.out.println(expenseText);
-            HashMap<String,String> priceInfo = fieldExtractor.getFields(expenseText);
+            HashMap<String, String> priceInfo = fieldExtractor.getFields(expenseText);
 
             EditText priceTextField = (EditText) findViewById(R.id.price);
             priceTextField.setText(priceInfo.get("amount"));
 
-            String currencyFound = priceInfo.get("currency").toUpperCase();
-            currencySpinner.setSelection(new Currencies().getPosition(currencyFound));
+            String currencyFound = priceInfo.get("currency");
+
+            if (!currencyFound.equals("")){
+                currencyFound = currencyFound.toUpperCase();
+                currencySpinner.setSelection(new Currencies().getPosition(currencyFound));
+            } else {
+                currencySpinner.setSelection(new Currencies().getPosition("EUR"));
+            }
 
             EditText dateTextField = (EditText) findViewById(R.id.date);
             dateTextField.setText(priceInfo.get("date"));

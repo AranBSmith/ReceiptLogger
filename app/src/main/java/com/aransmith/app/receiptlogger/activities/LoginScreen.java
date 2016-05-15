@@ -22,7 +22,7 @@ public class LoginScreen extends FeedbackNotificationActivity {
 
     private static final String TAG = "LoginScreen";
     protected Button loginButton;
-    protected EditText domainField, emailField, passwordField;
+    protected EditText emailField, passwordField;
     protected Login loginService;
     ProgressDialog mDialog;
 
@@ -31,7 +31,6 @@ public class LoginScreen extends FeedbackNotificationActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
 
-        domainField = (EditText) findViewById(R.id.input_domain);
         emailField = (EditText) findViewById(R.id.input_email);
         passwordField = (EditText) findViewById(R.id.input_password);
         loginButton = (Button) findViewById(R.id.btn_login);

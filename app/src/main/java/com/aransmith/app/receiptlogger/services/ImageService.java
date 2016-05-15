@@ -28,11 +28,6 @@ public class ImageService {
             options.inSampleSize = 4;
             bitmap = BitmapFactory.decodeFile(path, options);
 
-            /*out = new FileOutputStream(pngPath);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.close();
-            pngFile = new File(path);*/
-
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG, 70, stream);
             return stream.toByteArray();

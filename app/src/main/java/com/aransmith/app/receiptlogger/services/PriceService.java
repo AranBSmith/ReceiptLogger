@@ -18,6 +18,15 @@ public class PriceService {
         dateService = new DateService();
     }
 
+    public boolean checkFormat(String inputPrice){
+        // integer followed by a "." followed by 2 single digits
+        String format = "((\\d+)(.)(\\d)(\\d))";
+        if(inputPrice.matches(format))
+            return true;
+
+        return false;
+    }
+
     public double calculateMonthlyTotal(ExpenseRetrievalResponse expenseRetrievalResponse){
         LinkedList<Expense> expenses = expenseRetrievalResponse.getExpenses();
 

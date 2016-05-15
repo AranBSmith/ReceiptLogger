@@ -12,10 +12,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class DateServiceTest {
     private DateService dateService;
+    private String invalidDate, validDate;
 
     @Before
     public void setup(){
         dateService = new DateService();
+        invalidDate = "13/11/2000";
+        validDate = "12/11/2000";
     }
 
     @Test
@@ -26,5 +29,15 @@ public class DateServiceTest {
     @Test
     public void testInvalidDate(){
         assertFalse(dateService.withinMonth("2016-01-30"));
+    }
+
+    @Test
+    public void testInvalidInputDate(){
+        assertFalse(dateService.checkInputDate(invalidDate));
+    }
+
+    @Test
+    public void testValidInputDate(){
+        assertTrue(dateService.checkInputDate(validDate));
     }
 }

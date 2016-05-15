@@ -1,5 +1,6 @@
 package com.aransmith.app.receiptlogger.services;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,5 +26,17 @@ public class DateService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean checkInputDate(String inputDate){
+        try {
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            dateFormat.setLenient(false);
+            dateFormat.parse(inputDate);
+        } catch (ParseException e){
+            return false;
+        }
+
+        return true;
     }
 }

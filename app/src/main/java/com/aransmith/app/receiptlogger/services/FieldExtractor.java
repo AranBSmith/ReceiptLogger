@@ -258,10 +258,15 @@ public class FieldExtractor {
 
         ocrdText = ocrdText.toLowerCase();
         String[] splitOcrdText = splitOcrdText(ocrdText);
-        HashMap<String,String> priceInfo = getPrice(splitOcrdText);
-        String date = getDate(splitOcrdText);
 
+        String date = getDate(splitOcrdText);
+        String currency = getCurrency(splitOcrdText);
+
+        HashMap<String,String> priceInfo = getPrice(splitOcrdText);
+
+        priceInfo.put("currency", currency);
         priceInfo.put("date", date);
+
         return priceInfo;
     }
 }
