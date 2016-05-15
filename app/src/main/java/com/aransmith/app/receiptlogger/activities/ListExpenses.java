@@ -53,7 +53,6 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
         MyAsyncTask asyncTask = new MyAsyncTask();
         asyncTask.delegate = this;
         asyncTask.execute(credentials);
-
     }
 
     @Override

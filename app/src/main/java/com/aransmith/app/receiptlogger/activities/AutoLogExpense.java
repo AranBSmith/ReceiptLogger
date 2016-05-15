@@ -21,11 +21,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseResponse;
+import com.aransmith.app.receiptlogger.interfaces.AsyncHashMapResponse;
 import com.aransmith.app.receiptlogger.model.Categories;
 import com.aransmith.app.receiptlogger.model.Currencies;
 import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
-import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
 import com.aransmith.app.receiptlogger.services.DateService;
 import com.aransmith.app.receiptlogger.services.DirectoryCreate;
 import com.aransmith.app.receiptlogger.services.ExpenseService;
@@ -43,7 +43,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-public class AutoLogExpense extends FeedbackNotificationActivity {
+public class AutoLogExpense extends FeedbackNotificationActivity implements AsyncHashMapResponse {
     public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
             "/AutoLogExpense/";
 
@@ -145,7 +145,11 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
 
         currencySpinner.setAdapter(adapter);
 
-        performOCR();
+        // performOCR();
+
+        PerformOCRTask ocrTask = new PerformOCRTask();
+        ocrTask.delegate = this;
+        ocrTask.execute();
     }
 
     private boolean noNullValues(HashMap<String, String> values){
@@ -290,84 +294,76 @@ public class AutoLogExpense extends FeedbackNotificationActivity {
         }
     }
 
-    protected void startCameraActivity() {
-        Intent intent = null;
-        CameraActivitySetup camerAcivitySetup = new CameraActivitySetup(path);
-        intent = camerAcivitySetup.startCameraActivity();
-        startActivityForResult(intent, 0);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        Log.i(TAG, "resultCode: " + resultCode);
-
-        if (resultCode == -1) {
-            performOCR();
-        } else {
-            Log.v(TAG, "User cancelled");
-        }
-    }
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(AutoLogExpense.PHOTO_TAKEN, photoTaken);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.i(TAG, "onRestoreInstanceState()");
-        if (savedInstanceState.getBoolean(AutoLogExpense.PHOTO_TAKEN)) {
-            performOCR();
+    public void processFinish(HashMap<String, String> priceInfo){
+        EditText priceTextField = (EditText) findViewById(R.id.price);
+        priceTextField.setText(priceInfo.get("amount"));
+
+        String currencyFound = priceInfo.get("currency");
+
+        if (!currencyFound.equals("")){
+            currencyFound = currencyFound.toUpperCase();
+            currencySpinner.setSelection(new Currencies().getPosition(currencyFound));
+        } else {
+            currencySpinner.setSelection(new Currencies().getPosition("EUR"));
         }
+
+        EditText dateTextField = (EditText) findViewById(R.id.date);
+        dateTextField.setText(priceInfo.get("date"));
+
+        System.out.println("price information is: " + priceInfo);
+
+        priceValues = priceInfo;
     }
 
-    protected void performOCR() {
-        photoTaken = true;
-       
-        PhotoOrient photoOrient = new PhotoOrient(path);
-        Bitmap bitmap = photoOrient.orientImage();
+    private class PerformOCRTask extends AsyncTask<Void, Void, HashMap<String,String>> {
 
-        // the below will be performed as an async task.
-        PerformOCR performOCR = new PerformOCR(bitmap, lang, DATA_PATH);
-        String expenseText = performOCR.performOCR();
+        public AsyncHashMapResponse delegate = null;
 
-        if (lang.equalsIgnoreCase("eng")) {
-            expenseText = expenseText.replaceAll("[^a-zA-Z0-9]+", " ");
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            mDialog = new ProgressDialog(AutoLogExpense.this);
+            mDialog.setMessage("Scanning your receipt...");
+            mDialog.show();
         }
 
-        expenseText = expenseText.trim();
+        @Override
+        protected HashMap<String,String> doInBackground(Void... params) {
+            photoTaken = true;
 
-        if (expenseText.length() != 0) {
-            fieldExtractor = new FieldExtractor();
+            PhotoOrient photoOrient = new PhotoOrient(path);
+            Bitmap bitmap = photoOrient.orientImage();
 
-            textField.setText(textField.getText().toString().length() == 0 ? expenseText :
-                    textField.getText() + " " + expenseText);
+            // the below will be performed as an async task.
+            PerformOCR performOCR = new PerformOCR(bitmap, lang, DATA_PATH);
+            String expenseText = performOCR.performOCR();
 
-            textField.setSelection(textField.getText().toString().length());
-
-            // set price field to price found
-            System.out.println(expenseText);
-            HashMap<String, String> priceInfo = fieldExtractor.getFields(expenseText);
-
-            EditText priceTextField = (EditText) findViewById(R.id.price);
-            priceTextField.setText(priceInfo.get("amount"));
-
-            String currencyFound = priceInfo.get("currency");
-
-            if (!currencyFound.equals("")){
-                currencyFound = currencyFound.toUpperCase();
-                currencySpinner.setSelection(new Currencies().getPosition(currencyFound));
-            } else {
-                currencySpinner.setSelection(new Currencies().getPosition("EUR"));
+            if (lang.equalsIgnoreCase("eng")) {
+                expenseText = expenseText.replaceAll("[^a-zA-Z0-9]+", " ");
             }
 
-            EditText dateTextField = (EditText) findViewById(R.id.date);
-            dateTextField.setText(priceInfo.get("date"));
+            expenseText = expenseText.trim();
 
-            System.out.println("price information is: " + priceInfo);
+            if (expenseText.length() != 0) {
+                fieldExtractor = new FieldExtractor();
+                System.out.println(expenseText);
+                HashMap<String, String> priceInfo = fieldExtractor.getFields(expenseText);
+                return priceInfo;
+            }
 
-            priceValues = priceInfo;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(HashMap<String,String> result) {
+            delegate.processFinish(result);
+            mDialog.dismiss();
         }
     }
 }
