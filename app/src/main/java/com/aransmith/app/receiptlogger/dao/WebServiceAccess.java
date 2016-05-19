@@ -128,7 +128,7 @@ public class WebServiceAccess {
         return new ExpenseRetrievalResponse();
     }
 
-    public ExpenseSubmissionResponse submitExpense(Expense expense){
+    public ExpenseSubmissionResponse submitExpense(Expense expense, String password){
         try{
             expenseSubmissionResponse = new ExpenseSubmissionResponse();
             String target = url + "submitExpense/";
@@ -136,7 +136,7 @@ public class WebServiceAccess {
             httpClient = new DefaultHttpClient();
             httpPost = new HttpPost(target);
 
-            List<NameValuePair> nameValuePairs = preparedExpenseNameValuePair(expense);
+            List<NameValuePair> nameValuePairs = preparedExpenseNameValuePair(expense, password);
 
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
@@ -176,9 +176,10 @@ public class WebServiceAccess {
     }
 
     // convert Expense into a format that can be submitted via http post through the httpclient class
-    private List<NameValuePair> preparedExpenseNameValuePair(Expense expense){
-        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(8);
+    private List<NameValuePair> preparedExpenseNameValuePair(Expense expense, String password){
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(9);
         nameValuePairs.add(new BasicNameValuePair("email", expense.getEmail()));
+        nameValuePairs.add(new BasicNameValuePair("password", password));
         nameValuePairs.add(new BasicNameValuePair("price", String.valueOf(expense.getPrice())));
         nameValuePairs.add(new BasicNameValuePair("currency", expense.getCurrency()));
         nameValuePairs.add(new BasicNameValuePair("card", expense.getCard()));

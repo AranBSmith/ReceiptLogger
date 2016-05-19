@@ -286,7 +286,7 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
 
             expense.setExpenseImageData(bytes);
 
-            return expenseService.submitExpense(expense);
+            return expenseService.submitExpense(expense, password);
         }
 
         @Override

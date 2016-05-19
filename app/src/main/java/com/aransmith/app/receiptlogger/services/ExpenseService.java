@@ -24,8 +24,8 @@ public class ExpenseService {
         return webServiceAccess.retreiveExpenseByID(email, password, id);
     }
 
-    public ExpenseSubmissionResponse submitExpense(Expense expense){
-        return webServiceAccess.submitExpense(expense);
+    public ExpenseSubmissionResponse submitExpense(Expense expense, String password){
+        return webServiceAccess.submitExpense(expense, password);
     }
 
     public boolean cancelExpense(Expense expense){

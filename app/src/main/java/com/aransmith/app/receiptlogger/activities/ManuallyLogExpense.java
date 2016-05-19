@@ -70,7 +70,6 @@ public class ManuallyLogExpense extends FeedbackNotificationActivity {
         this.bundle = getIntent().getExtras();
         email = bundle.getString("email");
         password = bundle.getString("password");
-
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
         boolean hasPermission = (ContextCompat.checkSelfPermission(ManuallyLogExpense.this,
@@ -278,7 +277,7 @@ public class ManuallyLogExpense extends FeedbackNotificationActivity {
 
             expense.setExpenseImageData(bytes);
 
-            return expenseService.submitExpense(expense);
+            return expenseService.submitExpense(expense, password);
         }
 
         @Override

@@ -37,9 +37,22 @@
 
         <ListView
             android:id="@android:id/list"
-            android:layout_height="504dp"
+            android:layout_height="wrap_content"
             android:layout_width="match_parent">
         </ListView>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="61dp"
+            android:layout_marginTop="15dp">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Return"
+                android:id="@+id/returnbutton"
+                android:layout_gravity="center" />
+        </TableRow>
 
     </LinearLayout>
 </ScrollView>

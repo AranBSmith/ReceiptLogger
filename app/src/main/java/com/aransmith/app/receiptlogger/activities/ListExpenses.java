@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,6 +32,7 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
     ListView listView ;
     LinkedList<Expense> expenses;
     private ProgressDialog mDialog;
+    private Button returnButton;
 
 
     @Override
@@ -49,10 +51,23 @@ public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalR
         credentials.put("email", email);
         credentials.put("password", password);
 
+        returnButton = (Button) findViewById(R.id.returnbutton);
+        returnButton.setOnClickListener(new ReturnButton());
+
         // obtain information
         MyAsyncTask asyncTask = new MyAsyncTask();
         asyncTask.delegate = this;
         asyncTask.execute(credentials);
+    }
+
+    public class ReturnButton implements View.OnClickListener {
+        public void onClick(View view) {
+            Intent i = new Intent(getApplicationContext(), ActionSet.class);
+            i.putExtra("email", email);
+            i.putExtra("password", password);
+
+            startActivity(i);
+        }
     }
 
     @Override
