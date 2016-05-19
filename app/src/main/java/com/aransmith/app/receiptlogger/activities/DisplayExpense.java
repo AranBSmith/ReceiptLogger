@@ -5,25 +5,36 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.aransmith.app.receiptlogger.interfaces.AsyncCancelExpenseResponse;
+import com.aransmith.app.receiptlogger.interfaces.AsyncResponse;
 import com.aransmith.app.receiptlogger.model.CancelExpenseResponse;
+import com.aransmith.app.receiptlogger.model.ExpenseRetrievalResponse;
+import com.aransmith.app.receiptlogger.model.Response;
 import com.aransmith.app.receiptlogger.services.CancelExpenseService;
+import com.aransmith.app.receiptlogger.services.FileSystemService;
 
 import java.util.HashMap;
+
+import lombok.Data;
 
 /**
  * Created by Aran on 4/28/2016.
  */
-public class DisplayExpense extends Activity implements AsyncCancelExpenseResponse{
+public class DisplayExpense extends Activity implements AsyncResponse {
     private static final String TAG = "DisplayExpense";
+    public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
+            "/AutoLogExpense/";
 
     private Bundle bundle;
     private String email, password;
@@ -33,6 +44,7 @@ public class DisplayExpense extends Activity implements AsyncCancelExpenseRespon
     private AlertDialog alert1;
     private ProgressDialog mDialog;
     private CancelExpenseService cancelExpenseService;
+    private Bitmap imageBitmap;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,35 +60,40 @@ public class DisplayExpense extends Activity implements AsyncCancelExpenseRespon
         cancelExpenseButton.setOnClickListener(new cancelExpenseClickHandler());
 
         AlertDialog.Builder builder1 = new AlertDialog.Builder(DisplayExpense.this);
-            builder1.setMessage("Are you sure you want to cancel this expense?");
-            builder1.setCancelable(true);
+        builder1.setMessage("Are you sure you want to cancel this expense?");
+        builder1.setCancelable(true);
 
-            builder1.setPositiveButton(
-                    "Yes",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
 
-                            // perform asynchronous task with cancelling an expense on the webservice
+                        // perform asynchronous task with cancelling an expense on the webservice
 
-                            HashMap<String,String> cancelExpenseRequest = new HashMap<>();
-                            cancelExpenseRequest.put("email", email);
-                            cancelExpenseRequest.put("password", password);
-                            cancelExpenseRequest.put("id", String.valueOf(expenseID));
+                        HashMap<String, String> cancelExpenseRequest = new HashMap<>();
+                        cancelExpenseRequest.put("email", email);
+                        cancelExpenseRequest.put("password", password);
+                        cancelExpenseRequest.put("id", String.valueOf(expenseID));
 
-                            MyAsyncTask asyncTask = new MyAsyncTask();
-                            asyncTask.delegate = DisplayExpense.this;
-                            asyncTask.execute(cancelExpenseRequest);
-                        }
-                    });
+                        MyAsyncTask asyncTask = new MyAsyncTask();
+                        asyncTask.delegate = DisplayExpense.this;
 
-            builder1.setNegativeButton(
-                    "No",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+                        AsyncParameters asyncParameters = new AsyncParameters();
+                        asyncParameters.setResponseType(new CancelExpenseResponse());
+                        asyncParameters.setCancelExpenseRequest(cancelExpenseRequest);
+
+                        asyncTask.execute(asyncParameters);
+                    }
+                });
+
+        builder1.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
 
 
         alert1 = builder1.create();
@@ -84,22 +101,24 @@ public class DisplayExpense extends Activity implements AsyncCancelExpenseRespon
     }
 
     @Override
-    public void processFinish(CancelExpenseResponse output) {
+    public void processFinish(Response output) {
 
-        if(output.isSuccess()){
+        if (output != null && output.isSuccess() && output instanceof CancelExpenseResponse) {
             Intent i = new Intent(getApplicationContext(), ListExpenses.class);
             i.putExtra("email", email);
             i.putExtra("password", password);
 
             startActivity(i);
-
         } else {
 
+            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+            imageBitmap = BitmapFactory.decodeFile(DATA_PATH + expenseID + ".png");
+            imageView.setImageBitmap(imageBitmap);
         }
     }
 
     public class cancelExpenseClickHandler implements View.OnClickListener {
-        public void onClick(View view){
+        public void onClick(View view) {
             Log.i(TAG, "Expense is being cancelled");
             alert1.show();
         }
@@ -125,45 +144,74 @@ public class DisplayExpense extends Activity implements AsyncCancelExpenseRespon
         description.setText((String) bundle.get("description"));
 
         Boolean approval = (Boolean) bundle.get("approval");
-        if(approval) {
+        if (approval) {
             approved.setText("Expense Approved");
             approved.setTextColor(Color.GREEN);
         } else {
             approved.setText("Expense pending");
             approved.setTextColor(Color.RED);
         }
+
+        // display image
+        MyAsyncTask asyncTask = new MyAsyncTask();
+        asyncTask.delegate = this;
+
+        AsyncParameters asyncParameters = new AsyncParameters();
+        asyncParameters.setId(expenseID);
+        asyncParameters.setResponseType(new ExpenseRetrievalResponse());
+
+        System.out.println("Retrieving Image Expense ID: " + expenseID);
+
+        asyncTask.execute(asyncParameters);
     }
 
-    private class MyAsyncTask extends AsyncTask<HashMap<String,String>, Void, CancelExpenseResponse> {
+    @Data
+    private class AsyncParameters {
+        HashMap<String, String> cancelExpenseRequest;
+        Response responseType;
+        int id;
+    }
 
-        public AsyncCancelExpenseResponse delegate = null;
+    private class MyAsyncTask extends AsyncTask<AsyncParameters, Void, Response> {
+
+        public AsyncResponse delegate = null;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
             mDialog = new ProgressDialog(DisplayExpense.this);
-            mDialog.setMessage("Cancelling selected Expense...");
+            mDialog.setMessage("Processing Request Expense...");
             mDialog.show();
         }
 
         @Override
-        protected CancelExpenseResponse doInBackground(HashMap<String,String>... params) {
-            HashMap<String,String> cancelExpenseRequest = params[0];
+        protected Response doInBackground(AsyncParameters... params) {
+            if (params[0].getResponseType() instanceof ExpenseRetrievalResponse) {
 
-            String email = cancelExpenseRequest.get("email");
-            String password = cancelExpenseRequest.get("password");
-            int id = Integer.parseInt(cancelExpenseRequest.get("id"));
+                FileSystemService fileSystemService = new FileSystemService();
+                imageBitmap = fileSystemService.retrieveImage(email, password, params[0].getId());
+                return null;
 
-            System.out.println("cancelling: " + cancelExpenseRequest.get("email")
-                    + " " + cancelExpenseRequest.get("password") + " " + cancelExpenseRequest.get("id"));
+            } else {
+                HashMap<String, String> cancelExpenseRequest = params[0].getCancelExpenseRequest();
 
-            cancelExpenseService = new CancelExpenseService();
-            return cancelExpenseService.cancelExpense(email, password, id);
+                String email = cancelExpenseRequest.get("email");
+                String password = cancelExpenseRequest.get("password");
+                int id = Integer.parseInt(cancelExpenseRequest.get("id"));
+
+                System.out.println("cancelling: " + cancelExpenseRequest.get("email")
+                        + " " + cancelExpenseRequest.get("password") + " " + cancelExpenseRequest.get("id"));
+
+
+                cancelExpenseService = new CancelExpenseService();
+                return cancelExpenseService.cancelExpense(email, password, id);
+
+            }
         }
 
         @Override
-        protected void onPostExecute(CancelExpenseResponse result) {
+        protected void onPostExecute(Response result) {
             delegate.processFinish(result);
             mDialog.dismiss();
         }

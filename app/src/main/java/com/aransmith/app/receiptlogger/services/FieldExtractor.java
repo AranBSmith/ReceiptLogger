@@ -18,7 +18,7 @@ public class FieldExtractor {
 
     StringComparison stringComparison;
 
-    public HashMap<String,String> getPrice(String[] words){
+    public HashMap<String,String> getPriceField(String[] words){
 
         HashMap<String,String> priceInformation = new HashMap<>();
         String amount = "";
@@ -34,7 +34,7 @@ public class FieldExtractor {
         return priceInformation;
     }
 
-    public String getDate(String[] words) {
+    public String getDateField(String[] words) {
 
         String date = "";
         date = initialFieldSearch(new DateField(), words);
@@ -42,10 +42,13 @@ public class FieldExtractor {
         if(date.equals("")){
             date = imperfectFieldSearch(new DateField(), words);
         }
+
         return date;
     }
 
-    public String getCurrency(String[] words) {
+
+
+    public String getCurrencyField(String[] words) {
 
         String currency = "";
         currency = initialFieldSearch(new CurrencyField(), words);
@@ -202,18 +205,6 @@ public class FieldExtractor {
         return "";
     }
 
-    private boolean checkDateFormat(String date) {
-
-        boolean check = date.matches("(\\d\\d.\\d\\d)");
-        if (check){
-            System.out.println("checkDateFormat: " + date + " is of the right format");
-            return true;
-        } else {
-            System.out.println("checkDateFormat: " + date + " was not of the right format.");
-            return false;
-        }
-    }
-
     public boolean checkPriceFormat(String price){
         boolean check = price.matches("([a-zA-Z]{3}\\d+(.)(\\d+))");
         if (check){
@@ -259,10 +250,10 @@ public class FieldExtractor {
         ocrdText = ocrdText.toLowerCase();
         String[] splitOcrdText = splitOcrdText(ocrdText);
 
-        String date = getDate(splitOcrdText);
-        String currency = getCurrency(splitOcrdText);
+        String date = getDateField(splitOcrdText);
+        String currency = getCurrencyField(splitOcrdText);
 
-        HashMap<String,String> priceInfo = getPrice(splitOcrdText);
+        HashMap<String,String> priceInfo = getPriceField(splitOcrdText);
 
         priceInfo.put("currency", currency);
         priceInfo.put("date", date);

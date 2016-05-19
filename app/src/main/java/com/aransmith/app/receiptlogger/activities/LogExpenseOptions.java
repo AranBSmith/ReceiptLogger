@@ -29,12 +29,23 @@ public class LogExpenseOptions extends Activity {
         manualLogExpense = (Button) findViewById(R.id.manualLog);
 
         autoLogExpense.setOnClickListener(new automaticLogExpenseClickHandler());
+        manualLogExpense.setOnClickListener(new manualExpenseLogHandler());
     }
 
     public class automaticLogExpenseClickHandler implements View.OnClickListener {
         public void onClick(View view){
             Log.i(TAG, "Moving to AutoLogExpense Activity");
             Intent i = new Intent(getApplicationContext(),AutoLogExpense.class);
+            i.putExtra("email", email);
+            i.putExtra("password", password);
+            startActivity(i);
+        }
+    }
+
+    public class manualExpenseLogHandler implements View.OnClickListener {
+        public void onClick(View view){
+            Log.i(TAG, "Moving to manual expense log");
+            Intent i = new Intent(getApplicationContext(),ManuallyLogExpense.class);
             i.putExtra("email", email);
             i.putExtra("password", password);
             startActivity(i);

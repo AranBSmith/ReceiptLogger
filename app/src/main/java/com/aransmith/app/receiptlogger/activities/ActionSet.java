@@ -14,7 +14,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.aransmith.app.receiptlogger.services.CameraActivitySetup;
-import com.aransmith.app.receiptlogger.services.DirectoryCreate;
+import com.aransmith.app.receiptlogger.services.FileSystemService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -67,7 +67,7 @@ public class ActionSet extends Activity {
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
-        DirectoryCreate dcreate = new DirectoryCreate();
+        FileSystemService dcreate = new FileSystemService();
         if(!dcreate.createDirectories(paths)){
             Log.i(TAG, "ERROR: Not all directories were created so this activity cannot proceed");
         }
@@ -97,7 +97,6 @@ public class ActionSet extends Activity {
         }
 
         path = DATA_PATH + "/ocr.png";
-
     }
 
     public class logExpenseClickHandler implements View.OnClickListener {

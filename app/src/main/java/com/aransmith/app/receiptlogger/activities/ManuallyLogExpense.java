@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,18 +20,14 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseResponse;
-import com.aransmith.app.receiptlogger.interfaces.AsyncHashMapResponse;
 import com.aransmith.app.receiptlogger.model.Categories;
 import com.aransmith.app.receiptlogger.model.Currencies;
 import com.aransmith.app.receiptlogger.model.Expense;
 import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 import com.aransmith.app.receiptlogger.services.DateService;
 import com.aransmith.app.receiptlogger.services.ExpenseService;
-import com.aransmith.app.receiptlogger.services.FieldExtractor;
 import com.aransmith.app.receiptlogger.services.FileSystemService;
 import com.aransmith.app.receiptlogger.services.ImageService;
-import com.aransmith.app.receiptlogger.services.PerformOCR;
-import com.aransmith.app.receiptlogger.services.PhotoOrient;
 import com.aransmith.app.receiptlogger.services.PriceService;
 import com.aransmith.app.receiptlogger.services.UserInputChecker;
 
@@ -43,7 +38,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-public class AutoLogExpense extends FeedbackNotificationActivity implements AsyncHashMapResponse {
+/**
+ * Created by Aran on 19/05/2016.
+ */
+public class ManuallyLogExpense extends FeedbackNotificationActivity {
+
     public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
             "/AutoLogExpense/";
 
@@ -59,7 +58,6 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
     private String path;
     private boolean photoTaken;
     private Bundle bundle;
-    private FieldExtractor fieldExtractor;
     private ProgressDialog mDialog;
     private Currencies currencies;
 
@@ -75,10 +73,10 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
 
         String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
 
-        boolean hasPermission = (ContextCompat.checkSelfPermission(AutoLogExpense.this,
+        boolean hasPermission = (ContextCompat.checkSelfPermission(ManuallyLogExpense.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermission) {
-            ActivityCompat.requestPermissions(this.getParent() ,
+            ActivityCompat.requestPermissions(this.getParent(),
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_WRITE_STORAGE);
         }
@@ -144,12 +142,6 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
                 new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, currencyList);
 
         currencySpinner.setAdapter(adapter);
-
-        // performOCR();
-
-        PerformOCRTask ocrTask = new PerformOCRTask();
-        ocrTask.delegate = this;
-        ocrTask.execute();
     }
 
     private boolean noNullValues(HashMap<String, String> values){
@@ -270,7 +262,7 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
         protected void onPreExecute() {
             super.onPreExecute();
 
-            mDialog = new ProgressDialog(AutoLogExpense.this);
+            mDialog = new ProgressDialog(ManuallyLogExpense.this);
             mDialog.setMessage("Submitting your Expense...");
             mDialog.show();
         }
@@ -298,73 +290,7 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(AutoLogExpense.PHOTO_TAKEN, photoTaken);
+        outState.putBoolean(ManuallyLogExpense.PHOTO_TAKEN, photoTaken);
     }
 
-    public void processFinish(HashMap<String, String> priceInfo){
-        EditText priceTextField = (EditText) findViewById(R.id.price);
-        priceTextField.setText(priceInfo.get("amount"));
-
-        String currencyFound = priceInfo.get("currency");
-
-        if (!currencyFound.equals("")){
-            currencyFound = currencyFound.toUpperCase();
-            currencySpinner.setSelection(new Currencies().getPosition(currencyFound));
-        } else {
-            currencySpinner.setSelection(new Currencies().getPosition("EUR"));
-        }
-
-        EditText dateTextField = (EditText) findViewById(R.id.date);
-        dateTextField.setText(priceInfo.get("date"));
-
-        System.out.println("price information is: " + priceInfo);
-
-        priceValues = priceInfo;
-    }
-
-    private class PerformOCRTask extends AsyncTask<Void, Void, HashMap<String,String>> {
-
-        public AsyncHashMapResponse delegate = null;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            mDialog = new ProgressDialog(AutoLogExpense.this);
-            mDialog.setMessage("Scanning your receipt...");
-            mDialog.show();
-        }
-
-        @Override
-        protected HashMap<String,String> doInBackground(Void... params) {
-            photoTaken = true;
-
-            PhotoOrient photoOrient = new PhotoOrient(path);
-            Bitmap bitmap = photoOrient.orientImage();
-
-            // the below will be performed as an async task.
-            PerformOCR performOCR = new PerformOCR(bitmap, lang, DATA_PATH);
-            String expenseText = performOCR.performOCR();
-
-            if (lang.equalsIgnoreCase("eng")) {
-                expenseText = expenseText.replaceAll("[^a-zA-Z0-9]+", " ");
-            }
-
-            expenseText = expenseText.trim();
-
-            if (expenseText.length() != 0) {
-                fieldExtractor = new FieldExtractor();
-                System.out.println(expenseText);
-                return fieldExtractor.getFields(expenseText);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(HashMap<String,String> result) {
-            delegate.processFinish(result);
-            mDialog.dismiss();
-        }
-    }
 }

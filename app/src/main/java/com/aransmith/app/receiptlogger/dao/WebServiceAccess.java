@@ -99,6 +99,35 @@ public class WebServiceAccess {
         return null;
     }
 
+    public ExpenseRetrievalResponse retreiveExpenseByID(String email, String password, int id){
+        try {
+            String target = url + "retrieveExpensesByID/";
+
+            httpClient = new DefaultHttpClient();
+            httpPost = new HttpPost(target);
+
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+            nameValuePairs.add(new BasicNameValuePair("email", email));
+            nameValuePairs.add(new BasicNameValuePair("password", password));
+            nameValuePairs.add(new BasicNameValuePair("recordID", Integer.toString(id)));
+
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            HttpResponse response = httpClient.execute(httpPost);
+            String content = EntityUtils.toString(response.getEntity());
+
+            jsonObj = null;
+            jsonObj = new JSONObject(content);
+
+            ExpenseRetrievalResponse expenseRetrievalResponse = new Gson().fromJson(jsonObj.toString(), ExpenseRetrievalResponse.class);
+            return expenseRetrievalResponse;
+
+        } catch (Exception e) {
+            Log.e("WebServiceAccess", e.getMessage(), e);
+        }
+
+        return new ExpenseRetrievalResponse();
+    }
+
     public ExpenseSubmissionResponse submitExpense(Expense expense){
         try{
             expenseSubmissionResponse = new ExpenseSubmissionResponse();

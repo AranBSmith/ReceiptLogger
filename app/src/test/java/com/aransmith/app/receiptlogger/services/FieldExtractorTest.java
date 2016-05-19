@@ -91,7 +91,7 @@ public class FieldExtractorTest {
         // this segment is concerned with testing on ocr text that isn't too corrupt
         System.out.println("====Performing fieldExtraction on perfect string====");
         HashMap<String,String> priceInformation =
-                fieldExtractor.getPrice(prettyGoodOCRText.toLowerCase().split("\\s+"));
+                fieldExtractor.getPriceField(prettyGoodOCRText.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         String price = priceInformation.get("amount");
         System.out.println("Price information from pretty good ocr: " + price);
@@ -99,7 +99,7 @@ public class FieldExtractorTest {
 
         // this segment is concerned with testing on ocr text is imperfect
         System.out.println("====Performing fieldExtraction on imperfect string====");
-        priceInformation = fieldExtractor.getPrice(imperfectOCRText.toLowerCase().split("\\s+"));
+        priceInformation = fieldExtractor.getPriceField(imperfectOCRText.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from imperfect ocr: " + price);
@@ -107,7 +107,7 @@ public class FieldExtractorTest {
 
         // this segment is concerned with testing on ocr text that has no perfect price field
         System.out.println("====Performing fieldExtraction on noperfectpricefield string====");
-        priceInformation = fieldExtractor.getPrice(noPerfectPriceField.toLowerCase().split("\\s+"));
+        priceInformation = fieldExtractor.getPriceField(noPerfectPriceField.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from noperfectpricefield ocr: " + price);
@@ -115,14 +115,14 @@ public class FieldExtractorTest {
 
         // this segment is concerned with testing on ocr text that has no perfect price field
         System.out.println("====Performing fieldExtraction on ocrSample1 string====");
-        priceInformation = fieldExtractor.getPrice(ocrSample1.toLowerCase().split("\\s+"));
+        priceInformation = fieldExtractor.getPriceField(ocrSample1.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from ocrSample1 ocr: " + price);
         assertTrue(price.equals("220.00"));
 
         System.out.println("====Performing fieldExtraction on ocrSample2 string====");
-        priceInformation = fieldExtractor.getPrice(ocrSample2.toLowerCase().split("\\s+"));
+        priceInformation = fieldExtractor.getPriceField(ocrSample2.toLowerCase().split("\\s+"));
         assertNotNull(priceInformation);
         price = priceInformation.get("amount");
         System.out.println("Price information from ocrSample2 ocr: " + price);
@@ -151,7 +151,7 @@ public class FieldExtractorTest {
     public void testGetDate(){
         System.out.println("====Performing fieldExtraction on perfect string for a date.====");
         String dateInformation =
-                fieldExtractor.getDate(imperfectOCRText.toLowerCase().split("\\s+"));
+                fieldExtractor.getDateField(imperfectOCRText.toLowerCase().split("\\s+"));
         assertNotNull(dateInformation);
         System.out.println("Date information from imperfectOCR is:  " + dateInformation);
         assertTrue(dateInformation.equals("01/03"));
@@ -159,15 +159,15 @@ public class FieldExtractorTest {
 
     @Test
     public void testGetCurrency(){
-        String currency = fieldExtractor.getCurrency(prettyGoodOCRText.toLowerCase().split("\\s+"));
+        String currency = fieldExtractor.getCurrencyField(prettyGoodOCRText.toLowerCase().split("\\s+"));
         System.out.println("Currency was found to be: " + currency);
         assertTrue(currency.equals("eur"));
 
-        currency = fieldExtractor.getCurrency(imperfectOCRText.toLowerCase().split("\\s+"));
+        currency = fieldExtractor.getCurrencyField(imperfectOCRText.toLowerCase().split("\\s+"));
         System.out.println("Currency was found to be: " + currency);
         assertTrue(currency.equals("eur"));
 
-        currency = fieldExtractor.getCurrency(ocrSample2.toLowerCase().split("\\s+"));
+        currency = fieldExtractor.getCurrencyField(ocrSample2.toLowerCase().split("\\s+"));
         System.out.println("Currency was found to be: " + currency);
         assertTrue(currency.equals("eur"));
     }

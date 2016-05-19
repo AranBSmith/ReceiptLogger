@@ -20,6 +20,10 @@ public class ExpenseService {
         return webServiceAccess.retrieveUserExpenses(email, password);
     }
 
+    public ExpenseRetrievalResponse retrieveUserExpenseByID(String email, String password, int id){
+        return webServiceAccess.retreiveExpenseByID(email, password, id);
+    }
+
     public ExpenseSubmissionResponse submitExpense(Expense expense){
         return webServiceAccess.submitExpense(expense);
     }
