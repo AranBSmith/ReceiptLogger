@@ -4,6 +4,7 @@ import lombok.Data;
 
 /**
  * Created by Aran on 06/05/2016.
+ * An encapsulation of different currencies, ISO.
  * http://stackoverflow.com/questions/3536968/get-all-possible-available-currencies
  */
 

@@ -8,8 +8,15 @@ import java.util.Date;
 
 /**
  * Created by Aran on 4/30/2016.
+ * Service for performing tasks on strings representing dates.
  */
 public class DateService {
+
+    /**
+     * checks if a date is within the last 30 days.
+     * @param expenseDate
+     * @return <Code>true</Code> if date was within that last 30 days
+     */
     public boolean withinMonth(String expenseDate){
         try{
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -28,6 +35,11 @@ public class DateService {
         }
     }
 
+    /**
+     * Checks if a String representing a date adheres to the format of mm/dd/yyyy
+     * @param inputDate
+     * @return <Code>true</Code> if it matches the pattern mm/dd/yyyy
+     */
     public boolean checkInputDate(String inputDate){
         try {
             DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");

@@ -8,6 +8,7 @@ import java.io.File;
 
 /**
  * Created by Aran on 2/19/2016.
+ * Used by activities to allow for the use of the devices camera while in app.
  */
 public class CameraActivitySetup {
 
@@ -15,10 +16,18 @@ public class CameraActivitySetup {
 
     private String path;
 
+    /**
+     * specify path to which the photo will be saved
+     * @param path
+     */
     public CameraActivitySetup(String path) {
         this.path = path;
     }
 
+    /**
+     * take a photo
+     * @return Intent
+     */
     public Intent startCameraActivity() {
         File file = new File(path);
         Uri outputFileUri = Uri.fromFile(file);

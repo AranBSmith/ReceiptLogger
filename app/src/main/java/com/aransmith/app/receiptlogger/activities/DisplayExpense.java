@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -30,11 +29,15 @@ import lombok.Data;
 
 /**
  * Created by Aran on 4/28/2016.
+ * Activity used to show information and image of a particular expense. Upon entering this activity
+ * a request for the expense is created to the webservice, and the image will be provided in this
+ * request, however if the image already exists in the storage directory, the request will not be
+ * made to the webservice. This Activity allows for the user to cancel an expense.
+ * The user will also be able to view from this screen the approval status of their expense.
  */
 public class DisplayExpense extends Activity implements AsyncResponse {
     private static final String TAG = "DisplayExpense";
-    public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
-            "/AutoLogExpense/";
+    public static final String DATA_PATH = FileSystemService.getStorageDirectory();
 
     private Bundle bundle;
     private String email, password;

@@ -24,12 +24,14 @@ import java.util.LinkedList;
 
 /**
  * Created by Aran on 2/8/2016.
+ * Presents a list of the user's expenses as well as the total amount pending within the last 30 days.
+ * A user can either return to the ActionSet Activity or move to a DisplayExpense Activity.
  */
 public class ListExpenses extends ListActivity implements AsyncExpenseRetrievalResponse {
     private static final String TAG = "ListExpenses";
     private Bundle bundle;
     private String email, password;
-    ListView listView ;
+    ListView listView;
     LinkedList<Expense> expenses;
     private ProgressDialog mDialog;
     private Button returnButton;

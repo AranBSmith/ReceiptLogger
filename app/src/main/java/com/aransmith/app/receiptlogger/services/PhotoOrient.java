@@ -10,6 +10,7 @@ import java.io.IOException;
 
 /**
  * Created by Aran on 2/19/2016.
+ * Service used for orienting an image in preparation for OCR processing.
  */
 public class PhotoOrient {
 
@@ -17,8 +18,16 @@ public class PhotoOrient {
     private Bitmap bitmap;
     private String path;
 
+    /**
+     * specify the path of the image to be oriented
+     * @param path
+     */
     public PhotoOrient(String path){this.path = path;}
 
+    /**
+     * orientate the image as specified by the path, which was set in this classes constructor.
+     * @return an Oriented bitmap
+     */
     public Bitmap orientImage(){
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();

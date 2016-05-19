@@ -8,6 +8,9 @@ import java.util.LinkedList;
 
 import lombok.Data;
 
+/**
+ * Encapsulates the status of an ExpenseRetrieval task on the webservice.
+ */
 @Data
 public class ExpenseRetrievalResponse extends Response{
 

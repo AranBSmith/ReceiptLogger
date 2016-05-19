@@ -9,6 +9,8 @@ import android.widget.Button;
 
 /**
  * Created by Aran on 3/18/2016.
+ * This Actvity presents a UI allowing the user the choice of either scanning their image, or manually
+ * entering their expense details.
  */
 public class LogExpenseOptions extends Activity {
     private static final String TAG = "LogExpenseOptions";

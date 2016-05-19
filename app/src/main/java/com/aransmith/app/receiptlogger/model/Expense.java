@@ -4,6 +4,7 @@ import lombok.Data;
 
 /**
  * Created by Aran on 2/8/2016.
+ * Encapsulates information for a user expense.
  */
 
 @Data

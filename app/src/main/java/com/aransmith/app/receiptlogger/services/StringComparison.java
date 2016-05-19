@@ -9,8 +9,9 @@ import static org.apache.commons.lang3.StringUtils.getLevenshteinDistance;
  * a score on the comparison.
  */
 public class StringComparison {
+    private final int ACCURACY = 4;
+
     /**
-     *
      * @param first String from OCR.
      * @param second String to be tested against.
      * @return returns the levenshtein score between the first and
@@ -18,9 +19,6 @@ public class StringComparison {
      * too dissimilar. This happens when the amount of changes need to
      * turn first to second is second.length()-1 steps.
      */
-
-    private final int ACCURACY = 4;
-
     public int stringCompare(String first, String second){
 
         int firstLength = second.length();

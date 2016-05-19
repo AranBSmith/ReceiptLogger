@@ -17,6 +17,11 @@ import java.util.HashMap;
 
 /**
  * Created by Aran on 26/01/2016.
+ * This is the first Activity the user will be presented with upon opening the App for the first time.
+ * The user must enter valid credentials in order to sign in. The process of signing in will run in
+ * the background and the user is presented with a loading screen while this happens. When successful
+ * the user is presented with the ActionSet activity, else the user is notified that they must
+ * enter valid credentials.
  */
 public class LoginScreen extends FeedbackNotificationActivity {
 

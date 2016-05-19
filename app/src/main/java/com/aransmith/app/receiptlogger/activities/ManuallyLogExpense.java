@@ -31,15 +31,16 @@ import com.aransmith.app.receiptlogger.services.ImageService;
 import com.aransmith.app.receiptlogger.services.PriceService;
 import com.aransmith.app.receiptlogger.services.UserInputChecker;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 
 /**
  * Created by Aran on 19/05/2016.
+ * Rather than scanning a receipt this class allows the user to directly fill in the required fields.
+ * The user will be able to submit their expense if all the fields
+ * have valid entries and this submission will run in the background, notifying after the status of
+ * their submission. If submission was unsuccessful, the user is notified. If it was successful, the
+ * user will be presented with the ActionSet activity.
  */
 public class ManuallyLogExpense extends FeedbackNotificationActivity {
 
@@ -80,33 +81,21 @@ public class ManuallyLogExpense extends FeedbackNotificationActivity {
                     REQUEST_WRITE_STORAGE);
         }
 
-        FileSystemService dcreate = new FileSystemService();
-        if(!dcreate.createDirectories(paths)){
+        FileSystemService fileSystemService = new FileSystemService();
+        if(!fileSystemService.createDirectories(paths)){
             Log.i(TAG, "ERROR: Not all directories were created so this activity cannot proceed");
         }
 
-        if (!(new File(DATA_PATH + "tessdata/" + lang + ".traineddata")).exists()) {
-            try {
+        AssetManager assetManager = getAssets();
 
-                AssetManager assetManager = getAssets();
-                InputStream in = assetManager.open("tessdata/" + lang + ".traineddata");
-                OutputStream out = new FileOutputStream(DATA_PATH
-                        + "tessdata/" + lang + ".traineddata");
-
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-
-                Log.v(TAG, "Copied " + lang + " traineddata");
-            } catch (IOException e) {
-                Log.e(TAG, "Was unable to copy " + lang + " traineddata " + e.toString());
-            }
+        try {
+            fileSystemService.storeTrainedData(assetManager);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(TAG, "Was unable to copy " + lang + " traineddata " + e.toString());
         }
+
+        path = DATA_PATH + "/ocr.png";
 
         path = DATA_PATH + "/ocr.png";
 

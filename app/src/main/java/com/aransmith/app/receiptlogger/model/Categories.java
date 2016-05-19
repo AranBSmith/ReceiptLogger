@@ -4,6 +4,7 @@ import lombok.Data;
 
 /**
  * Created by Aran on 4/6/2016.
+ * Encapsulation of categories a user can categorize their expense under.
  */
 
 @Data

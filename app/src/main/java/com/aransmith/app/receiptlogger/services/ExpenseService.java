@@ -7,6 +7,8 @@ import com.aransmith.app.receiptlogger.model.ExpenseSubmissionResponse;
 
 /**
  * Created by Aran on 2/8/2016.
+ * Service used to invoke the web service access object for either submission of an expense, or
+ * the retrieval of expenses.
  */
 public class ExpenseService {
 
@@ -16,19 +18,25 @@ public class ExpenseService {
         webServiceAccess = new WebServiceAccess();
     }
 
+    /**
+     * Retrieve all of users expenses according to an email, password required for verification.
+     * @param email
+     * @param password
+     * @return ExpenseRetrievalResponse containing the status of the expense retrieval and the
+     * web service. Will also contain any exceptions in the web service.
+     */
     public ExpenseRetrievalResponse retrieveUserExpenses(String email, String password){
         return webServiceAccess.retrieveUserExpenses(email, password);
     }
 
-    public ExpenseRetrievalResponse retrieveUserExpenseByID(String email, String password, int id){
-        return webServiceAccess.retreiveExpenseByID(email, password, id);
-    }
-
+    /**
+     * Submit an expense to the web service.
+     * @param expense
+     * @param password
+     * @return ExpenseSubmissionResponse containing containing the status of the expense submission
+     * and the web service. Will also contain any exceptions in the web service.
+     */
     public ExpenseSubmissionResponse submitExpense(Expense expense, String password){
         return webServiceAccess.submitExpense(expense, password);
-    }
-
-    public boolean cancelExpense(Expense expense){
-        return true;
     }
 }

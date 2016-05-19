@@ -28,6 +28,7 @@ import java.util.List;
 
 /**
  * Created by Aran on 2/8/2016.
+ * This data access class interacts with the web service for the service layer.
  */
 public class WebServiceAccess {
 
@@ -71,6 +72,15 @@ public class WebServiceAccess {
         return false;
     }
 
+    /**
+     * Retrieve all of a user's expenses by their email.
+     * @param email
+     * @param password
+     * @return ExpenseRetrievalResponse containing the status of the user expense retrieval, as well
+     * as Expenses if the retrieval was successful. This will not retrieve image information as the
+     * process of retrieving all expense images can be slow, with the result of the user not even
+     * viewing all the his/her expenses.
+     */
     public ExpenseRetrievalResponse retrieveUserExpenses(String email, String password){
         try {
             String target = url + "userExpenseRetrieval/";
@@ -99,6 +109,14 @@ public class WebServiceAccess {
         return null;
     }
 
+    /**
+     * Retrieve a particular expense by its ID, all information about the expense will be returned
+     * including image data. The user's credentials must be provided for verification.
+     * @param email
+     * @param password
+     * @param id
+     * @return ExpenseRetrivalResponse with image data that is compressed and in a base64 string
+     */
     public ExpenseRetrievalResponse retreiveExpenseByID(String email, String password, int id){
         try {
             String target = url + "retrieveExpensesByID/";
@@ -128,6 +146,14 @@ public class WebServiceAccess {
         return new ExpenseRetrievalResponse();
     }
 
+
+    /**
+     * Submit a user's expense, requires a password for verification.
+     * @param expense
+     * @param password
+     * @return ExpenseSubmissionResponse containing the status of the expense submission as well as
+     * exceptions thrown during this process on the webservice.
+     */
     public ExpenseSubmissionResponse submitExpense(Expense expense, String password){
         try{
             expenseSubmissionResponse = new ExpenseSubmissionResponse();
@@ -202,6 +228,15 @@ public class WebServiceAccess {
         return nameValuePairs;
     }
 
+    /**
+     * Used to cancel an expense by its identifier. email and password are required to verify the
+     * request.
+     * @param email
+     * @param password
+     * @param id
+     * @return CancelExpenseResponse containing the status of the request as well as exceptions
+     * thrown during the process.
+     */
     public CancelExpenseResponse cancelExpense(String email, String password, int id) {
         try {
             String target = url + "cancelExpense/";

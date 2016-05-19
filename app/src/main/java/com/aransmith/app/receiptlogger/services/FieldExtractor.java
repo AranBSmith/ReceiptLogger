@@ -11,8 +11,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  * Created by Aran on 3/15/2016.
  * FieldExtractor is responsible for reading source OCR text
- * and interpreting receipt fields within e.g. Date, Currency,
- * Sale price, end debit card number etc.
+ * and interpreting receipt fields within e.g. Date, Currency, End price.
  */
 public class FieldExtractor {
 
@@ -244,6 +243,11 @@ public class FieldExtractor {
         return words;
     }
 
+    /**
+     * Used to get information found in a receipt
+     * @param ocrdText
+     * @return <Code>HashMap<String,String> with keys: amount, currency, and date</Code>
+     */
     public HashMap<String, String> getFields(String ocrdText){
         // split text and pass into each getField function
 

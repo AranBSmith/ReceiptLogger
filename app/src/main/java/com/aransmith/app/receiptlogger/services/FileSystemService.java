@@ -1,5 +1,6 @@
 package com.aransmith.app.receiptlogger.services;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -13,10 +14,13 @@ import org.springframework.util.Base64Utils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.DataFormatException;
 
 /**
  * Created by Aran on 2/20/2016.
+ *
  */
 public class FileSystemService {
 
@@ -24,6 +28,7 @@ public class FileSystemService {
     private static final String TAG = "FileSystemService";
     public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() +
             "/AutoLogExpense/";
+    public static final String lang = "eng";
 
 
     public boolean createDirectories(String[] paths){
@@ -40,11 +45,6 @@ public class FileSystemService {
 
         }
         return true;
-    }
-
-    public boolean saveImage(){
-
-        return false;
     }
 
     public Bitmap retrieveImage(String email, String password, int id){
@@ -89,9 +89,34 @@ public class FileSystemService {
         return null;
     }
 
-    public boolean removeImage(String id){
+    public boolean storeTrainedData(AssetManager assetManager) throws IOException{
+        if (!(new File(DATA_PATH + "tessdata/" + lang + ".traineddata")).exists()) {
+            InputStream in = assetManager.open("tessdata/" + lang + ".traineddata");
+            OutputStream out = new FileOutputStream(DATA_PATH
+                    + "tessdata/" + lang + ".traineddata");
 
+            // Transfer bytes from in to out
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
 
-        return false;
+            in.close();
+            out.close();
+
+            Log.v(TAG, "Copied " + lang + " traineddata");
+        }
+
+        return true;
+    }
+
+    public static String getStorageDirectory(){
+        return Environment.getExternalStorageDirectory().toString() +
+                "/AutoLogExpense/";
+    }
+
+    public static int requestWriteStorageCode(){
+        return 112;
     }
 }

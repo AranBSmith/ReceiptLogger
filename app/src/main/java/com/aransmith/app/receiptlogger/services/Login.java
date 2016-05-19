@@ -4,6 +4,7 @@ import com.aransmith.app.receiptlogger.dao.WebServiceAccess;
 
 /**
  * Created by Aran on 2/8/2016.
+ * Used to submit credentials to the web service
  */
 public class Login {
 
@@ -15,6 +16,12 @@ public class Login {
         emailService = new EmailService();
     }
 
+    /**
+     * check if the submitted credentials are not null and are of a valid format.
+     * @param email
+     * @param password
+     * @return
+     */
     public boolean checkCredentials(String email, String password){
 
         // verify if email is of a valid format.

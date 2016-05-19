@@ -5,6 +5,7 @@ import com.aransmith.app.receiptlogger.model.CancelExpenseResponse;
 
 /**
  * Created by Aran on 5/1/2016.
+ * service used to invoke the web service access object for the cancellation of an expense
  */
 public class CancelExpenseService {
     WebServiceAccess webServiceAccess;
