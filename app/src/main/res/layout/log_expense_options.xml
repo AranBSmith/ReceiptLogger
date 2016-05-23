@@ -31,14 +31,6 @@
             android:padding="12dp"
             android:text="Scan your picture"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Take a picture of your expense and let the app find details for you!"
-            android:id="@+id/textView"
-            android:layout_gravity="center_horizontal" />
-
 
     </LinearLayout>
 </ScrollView>

@@ -1,4 +1,4 @@
-package com.aransmith.app.receiptlogger.activities;
+package com.aransmith.app.receiptlogger.interfaces;
 
 import android.app.Activity;
 import android.content.Context;

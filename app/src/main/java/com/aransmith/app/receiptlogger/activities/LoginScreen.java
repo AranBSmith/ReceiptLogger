@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncBoolResponse;
+import com.aransmith.app.receiptlogger.interfaces.FeedbackNotificationActivity;
 import com.aransmith.app.receiptlogger.services.Login;
 import com.aransmith.app.receiptlogger.services.UserInputChecker;
 

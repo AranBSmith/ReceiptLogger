@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.aransmith.app.receiptlogger.interfaces.AsyncExpenseResponse;
 import com.aransmith.app.receiptlogger.interfaces.AsyncHashMapResponse;
+import com.aransmith.app.receiptlogger.interfaces.FeedbackNotificationActivity;
 import com.aransmith.app.receiptlogger.model.Categories;
 import com.aransmith.app.receiptlogger.model.Currencies;
 import com.aransmith.app.receiptlogger.model.Expense;
@@ -108,8 +109,9 @@ public class AutoLogExpense extends FeedbackNotificationActivity implements Asyn
 
         setContentView(R.layout.main);
 
-        textField = (EditText) findViewById(R.id.field);
-        descriptionTextField = (EditText) findViewById(R.id.expensedescription);
+        // used in debugging
+        /*textField = (EditText) findViewById(R.id.field);
+        descriptionTextField = (EditText) findViewById(R.id.expensedescription);*/
 
         submitExpenseButton = (Button) findViewById(R.id.submitexpensebutton);
         submitExpenseButton.setOnClickListener(new SubmitExpenseClickHandler());
